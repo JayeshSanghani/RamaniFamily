@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="view_bottom">4dp</dimen>
+    <dimen name="font_size">14sp</dimen>
+    <dimen name="font_size_title">16sp</dimen>
+</resources>

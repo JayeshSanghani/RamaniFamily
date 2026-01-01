@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">Ramani Family</string>
+
+    <string name="str_ramani_parivar">રામાણી પરિવાર</string>
+    <string name="str_aapnu">આપનું હાર્દિક સ્વાગત કરે છે</string>
+    <string name="str_something_went_wrong">Something went wrong</string>
+    <string name="str_no_internet_connection">No internet connection</string>
+
+    <string name="str_member_type">Member type</string>
+    <string name="sel_member_type">Select member type</string>
+
+
+    <string name="str_register">Register</string>
+    <string name="str_submit">Submit</string>
+    <string name="str_firstname">First name</string>
+    <string name="ent_firstname">Enter First name</string>
+    <string name="str_middlename">Middle name</string>
+    <string name="ent_middlename">Middle  name</string>
+    <string name="str_surname">Surname</string>
+    <string name="ent_surname">Enter surname</string>
+    <string name="str_district">District</string>
+    <string name="sel_district">Select district</string>
+    <string name="str_taluka">Taluka</string>
+    <string name="sel_taluka">Select taluka</string>
+    <string name="str_village">Village</string>
+    <string name="sel_village">Select village</string>
+    <string name="str_marital_status">Marital status</string>
+    <string name="str_sel_marital_status">Select Marital status</string>
+    <string name="str_blood_group">Blood Group</string>
+    <string name="str_sel_blood_group">Select blood group</string>
+    <string name="str_mobile_no">Mobile Number</string>
+    <string name="ent_mobile_no">Enter mobile Number</string>
+    <string name="str_password">Password</string>
+    <string name="ent_password">Enter password</string>
+    <string name="ent_mobile">Enter 10 digit mobile no</string>
+    <string name="str_dont">Don\'t have an accout?</string>
+    <string name="str_signup">Sign up</string>
+
+    <string name="str_profile">Profile</string>
+    <string name="str_personal_detail">Personal Detail</string>
+    <string name="str_business_detail">Business Detail</string>
+    <string name="str_marital_detail">Marital Detail</string>
+    <string name="str_logout">Logout</string>
+
+    <string name="str_member_id">Member id</string>
+    <string name="str_member_id_msg">Have you Member id, then register with it. Otherwise Skip and fill up your basic details.</string>
+    <string name="ent_member_id">Enter your id.</string>
+    <string name="str_native_add">Native address</string>
+    <string name="str_current_add">Current address</string>
+    <string name="ent_current_add">Enter current address</string>
+    <string name="str_age">Age</string>
+    <string name="str_date_of_birth">dd-MM-yyyy</string>
+    <string name="str_date_of_donate">yyyy-MM-dd</string>
+    <string name="ent_date_of_birth">Enter date of birth</string>
+    <string name="ent_inv_date_of_birth">Enter valid date of birth</string>
+    <string name="ent_less_then_current_date">Selected date of birth must be less then current date</string>
+    <string name="str_email">Email</string>
+    <string name="ent_email">Enter email</string>
+    <string name="ent_valid_email">Enter valid email</string>
+    <string name="str_gender">Gender</string>
+    <string name="str_sel_gender">Select gender</string>
+    <string name="str_show_number">Show number?</string>
+    <string name="str_donate_blood">Donate blood ?</string>
+    <string name="str_yes"> Yes</string>
+    <string name="str_no"> No</string>
+    <string name="str_lbl_date_of_birth">Date of birth</string>
+    <string name="str_lbl_date_of_donation">Last Donated Date</string>
+    <string name="str_is_blood_donated">Select is blood donated?</string>
+    <string name="str_last_donated_blood_date">Enter last donated blood</string>
+    <string name="str_save">Save</string>
+    <string name="str_sel_image">Select Image</string>
+    <string name="str_camera">Camera</string>
+    <string name="str_gallery">Gallery</string>
+    <string name="str_add_family_member">Add family member</string>
+    <string name="str_notes">Notes</string>
+    <string name="str_relation">Relation</string>
+
+    <string name="str_add_business">Choose business card</string>
+    <string name="str_business_name">Business name</string>
+    <string name="ent_business_name">Enter business name</string>
+    <string name="str_business_address">Business address</string>
+    <string name="ent_business_address">Enter business address</string>
+    <string name="str_business_contact">Business contact</string>
+    <string name="ent_business_contact">Enter business contact</string>
+    <string name="str_other_detail">Other detail</string>
+    <string name="ent_other_detail">Enter other detail</string>
+
+    <string name="str_height">Height</string>
+    <string name="str_hint_height">00 cm</string>
+    <string name="ent_height">Enter height</string>
+    <string name="str_weight">Weight</string>
+    <string name="str_hint_weight">0 kg</string>
+    <string name="ent_weight">Enter weight</string>
+    <string name="str_zodiac_sign">Zodiac sign</string>
+    <string name="ent_zodiac_sign">Select zodiac sign</string>
+    <string name="str_education">Education</string>
+    <string name="str_ent_education">Enter your education.</string>
+    <string name="str_occupation">Occupation.</string>
+    <string name="str_ent_occupation">Enter your occupation.</string>
+    <string name="str_metarnal_detail">Metarnal detail</string>
+    <string name="ent_metarnal_detail">Enter metarnal detail</string>
+    <string name="str_land">Property detail</string>
+    <string name="ent_land">Enter Property detail</string>
+    <string name="str_brother">Brother</string>
+    <string name="ent_brother">Enter number of brother</string>
+    <string name="str_sister">Sister</string>
+    <string name="ent_sister">Enter number of sister</string>
+
+</resources>

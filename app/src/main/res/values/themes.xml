@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.RamaniFamily" parent="android:Theme.Material.Light.NoActionBar">
+    </style>
+
+    <!--<style name="Base.Theme.RamaniFamily" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/green_500</item>
+        <item name="colorPrimaryDark">@color/green_700</item>
+        &lt;!&ndash; Status bar color. &ndash;&gt;
+&lt;!&ndash;        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimary</item>&ndash;&gt;
+
+        <item name="android:statusBarColor">@color/green_700</item>
+        <item name="android:navigationBarColor">@color/green_700</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <style name="Theme.RamaniFamily" parent="Base.Theme.RamaniFamily" />-->
+
+</resources>
