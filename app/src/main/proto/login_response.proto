@@ -4,45 +4,72 @@ option java_package = "com.ramanifamily.datastore";
 option java_multiple_files = true;
 
 message LoginResponseProto {
-  string message = 1;
-  UserProto user = 2;
-  bool status = 3;
-  string token = 4;
+  bool status = 1;
+  string message = 2;
+  string token = 3;
+  UserProto user = 4;
+  repeated BannerProto banners = 5;
 }
 
 message UserProto {
-  string education = 1;
-  string occupation = 2;
-  string gender = 3;
-  string business_address = 4;
-  string created_at = 5;
-  string last_donated = 6;
-  string updated_at = 7;
-  string surname = 8;
-  int32 id = 9;
-  string village = 10;
-  string maternal_detail = 11;
-  string first_name = 12;
-  int32 sister = 13;
-  string height = 14;
-  string business_name = 15;
-  string address = 16;
-  string zodiac = 17;
-  string mobile = 18;
-  string weight = 19;
-  string middle_name = 20;
-  string business_contact = 21;
+  int32 id = 1;
+  string name = 2;
+  string first_name = 3;
+  string middle_name = 4;
+  string surname = 5;
+
+  int32 state_id = 6;
+  string state_name = 7;
+
+  int32 district_id = 8;
+  string district_name = 9;
+
+  int32 sub_district_id = 10;
+  string sub_district_name = 11;
+
+  string district = 12;
+  string taluka = 13;
+  string village = 14;
+  string address = 15;
+
+  string dob = 16;
+  string mobile = 17;
+  string email = 18;
+
+  bool show_number = 19;
+  string gender = 20;
+  string profile_img = 21;
+
   string marital_status = 22;
-  string dob = 23;
-  int32 donate_blood = 24;
-  string district = 25;
-  string taluka = 26;
-  string name = 27;
-  int32 show_number = 28;
-  string property_detail = 29;
-  string blood_group = 30;
+  string last_donated = 23;
+  string blood_group = 24;
+  bool donate_blood = 25;
+
+  string created_at = 26;
+  string updated_at = 27;
+
+  string business_name = 28;
+  string business_address = 29;
+  string business_contact = 30;
+
   string other_detail = 31;
-  int32 brother = 32;
+  string height = 32;
+  string weight = 33;
+  string zodiac = 34;
+
+  string education = 35;
+  string occupation = 36;
+
+  int32 brother = 37;
+  int32 sister = 38;
+
+  string maternal_detail = 39;
+  string property_detail = 40;
+
+  bool is_admin = 41;
 }
 
-
+message BannerProto {
+  int32 id = 1;
+  string image = 2;
+}

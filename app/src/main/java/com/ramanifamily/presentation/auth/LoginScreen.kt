@@ -50,6 +50,7 @@ import com.ramanifamily.common.AppOutlinedTextField
 import com.ramanifamily.common.CustomButton
 import com.ramanifamily.common.LoadingOverlay
 import com.ramanifamily.common.ToastUtils
+import com.ramanifamily.common.Utils
 import com.ramanifamily.data.entity.LoginRequest
 import com.ramanifamily.data.remote.AppModule
 import com.ramanifamily.presentation.viewmodel.LoginViewModel
@@ -65,7 +66,7 @@ fun LoginScreen(
     val view = LocalView.current
     val context = view.context
 
-    var mobileNo by remember { mutableStateOf("9876543211") }
+    var mobileNo by remember { mutableStateOf("7600400399") }
     var password by remember { mutableStateOf("123456") }
     var isPasswordVisible by remember { mutableStateOf(false) }
 
@@ -141,6 +142,7 @@ fun LoginScreen(
                 when {
                     mobileNo.length != 10 -> ToastUtils.show(context, R.string.ent_mobile)
                     password.isBlank() -> ToastUtils.show(context, R.string.ent_password)
+//                    !Utils.isValidPassword(password) ->  ToastUtils.show(context, R.string.validate_password)
                     else -> {
 
                         Log.e("Login", "$mobileNo - $password")

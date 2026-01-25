@@ -1,36 +1,36 @@
 package com.ramanifamily.presentation.viewmodel
 
-import android.content.Context
-import androidx.appcompat.R
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.ramanifamily.common.Utils
 import com.ramanifamily.common.network.NetworkChecker
-import com.ramanifamily.common.network.NetworkUtil
 import com.ramanifamily.data.entity.CommonIdName
-import com.ramanifamily.data.entity.RegisterRequest
-import com.ramanifamily.data.entity.RegisterResponse
 import com.ramanifamily.data.remote.ApiState
-import com.ramanifamily.data.remote.ProgressUtils
-import com.ramanifamily.domain.usecase.RegisterUserUseCase
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import com.ramanifamily.data.remote.ApiErrorParser
+import com.ramanifamily.data.repository.UserDataStoreRepository
 import com.ramanifamily.domain.usecase.GetDistrictsUseCase
 import com.ramanifamily.domain.usecase.GetSubDistrictsUseCase
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-class RegisterViewModel(
-    private val registerUserUseCase: RegisterUserUseCase,
+class PersonalDetailsViewModel(
+    private val userDataStoreRepository: UserDataStoreRepository,
     private val getDistrictsUseCase: GetDistrictsUseCase,
     private val getSubDistrictsUseCase: GetSubDistrictsUseCase,
     private val networkChecker: NetworkChecker
 ) : ViewModel() {
 
-    //Register State
-   private val _registerState = MutableStateFlow<ApiState<RegisterResponse>>(ApiState.Idle)
-    val registerState: StateFlow<ApiState<RegisterResponse>> = _registerState
+    //Map Proto → UI Model HERE
+    val userDetails = userDataStoreRepository.getLoginResponse().map { proto ->
+            proto.takeIf { proto.user.id.toString().isNotBlank() }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = null
+        )
 
     //Districts State
     private val _districtsState = MutableStateFlow<ApiState<CommonIdName>>(ApiState.Idle)
@@ -39,36 +39,6 @@ class RegisterViewModel(
     //Sub-Districts State
     private val _subDistrictsState = MutableStateFlow<ApiState<CommonIdName>>(ApiState.Idle)
     val subDistrictsState: StateFlow<ApiState<CommonIdName>> = _subDistrictsState
-
-    // ========================= REGISTER =========================
-    fun registerUser(request: RegisterRequest) {
-        viewModelScope.launch {
-            if (!networkChecker.isConnected()) {
-                _registerState.value = ApiState.Error(Utils.NO_INTERNET_CONNECTION)
-                return@launch
-            }
-            _registerState.value = ApiState.Loading
-
-            try {
-                val response = registerUserUseCase.execute(request)
-
-                if (response.isSuccessful && response.body()?.status == true) {
-                    _registerState.value =  ApiState.Success(response.body()!!)
-                } else {
-//                    val errorBody = response.errorBody()?.string()
-//                    val message = ApiErrorParser.parse(errorBody)
-                    _registerState.value = ApiState.Error(Utils.parseError(response))
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                _registerState.value = ApiState.Error(Utils.SOMETHING_WENT_WRONG)
-            }
-        }
-    }
-
-    fun resetState() {
-        _registerState.value = ApiState.Idle
-    }
 
     // ========================= DISTRICTS =========================
     fun getDistricts(stateId: Int) {
@@ -102,7 +72,7 @@ class RegisterViewModel(
     fun getSubDistricts(districtId: Int) {
         viewModelScope.launch {
             if (!networkChecker.isConnected()) {
-                _subDistrictsState.value =ApiState.Error(Utils.NO_INTERNET_CONNECTION)
+                _subDistrictsState.value = ApiState.Error(Utils.NO_INTERNET_CONNECTION)
                 return@launch
             }
             _subDistrictsState.value = ApiState.Loading
@@ -117,8 +87,7 @@ class RegisterViewModel(
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                _subDistrictsState.value =
-                    ApiState.Error(Utils.SOMETHING_WENT_WRONG)
+                _subDistrictsState.value = ApiState.Error(Utils.SOMETHING_WENT_WRONG)
             }
         }
     }
@@ -127,7 +96,3 @@ class RegisterViewModel(
         _subDistrictsState.value = ApiState.Idle
     }
 }
-
-
-
-

@@ -1,67 +1,105 @@
 package com.ramanifamily.data.datastore.mapper
 
+import com.ramanifamily.data.entity.BannersItem
 import com.ramanifamily.data.entity.LoginResponse
 import com.ramanifamily.data.entity.User
+import com.ramanifamily.datastore.BannerProto
 import com.ramanifamily.datastore.LoginResponseProto
 import com.ramanifamily.datastore.UserProto
 
+// --------------------------------------------------
+// Primitive safe helpers
+// --------------------------------------------------
+private fun String?.safe() = this ?: ""
+private fun Int?.safe() = this ?: 0
+private fun Long?.safe() = this ?: 0L
+private fun Boolean?.safe() = this ?: false
 
-// ---------- Primitive safe helpers ----------
-fun String?.safe() = this ?: ""
-fun Int?.safe() = this ?: 0
-fun Long?.safe() = this ?: 0L
-fun Boolean?.safe() = this ?: false
-
+// --------------------------------------------------
 // User → UserProto
-fun User?.toProto(): UserProto =
+// --------------------------------------------------
+fun User.toProto(): UserProto =
     UserProto.newBuilder()
-        .setId(this?.id.safe())
-        .setName(this?.name.safe())
-        .setFirstName(this?.firstName.safe())
-        .setMiddleName(this?.middleName.safe())
-        .setSurname(this?.surname.safe())
+        .setId(id.safe())
+        .setName(name.safe())
+        .setFirstName(firstName.safe())
+        .setMiddleName(middleName.safe())
+        .setSurname(surname.safe())
 
-        .setGender(this?.gender.safe())
-        .setDob(this?.dob.safe())
-        .setHeight(this?.height.safe())
-        .setWeight(this?.weight.safe())
-        .setBloodGroup(this?.bloodGroup.safe())
-        .setZodiac(this?.zodiac.safe())
+        .setStateId(stateId.safe())
+        .setStateName(stateName.safe())
+        .setDistrictId(districtId.safe())
+        .setDistrictName(districtName.safe())
+        .setSubDistrictId(subDistrictId.safe())
+        .setSubDistrictName(subDistrictName.safe())
 
-        .setEducation(this?.education.safe())
-        .setOccupation(this?.occupation.safe())
-        .setMobile(this?.mobile.safe())
+        .setDistrict(district.safe())
+        .setTaluka(taluka.safe())
+        .setVillage(village.safe())
+        .setAddress(address.safe())
 
-        .setShowNumber(this?.showNumber.safe())
-        .setDonateBlood(this?.donateBlood.safe())
+        .setDob(dob.safe())
+        .setMobile(mobile.safe())
+        .setEmail(email.safe())
 
-        .setAddress(this?.address.safe())
-        .setBusinessName(this?.businessName.safe())
-        .setBusinessAddress(this?.businessAddress.safe())
-        .setBusinessContact(this?.businessContact.safe())
-        .setPropertyDetail(this?.propertyDetail.safe())
-        .setOtherDetail(this?.otherDetail.safe())
+        .setShowNumber(showNumber.safe())
+        .setGender(gender.safe())
+        .setProfileImg(profileImg.safe())
 
-        .setVillage(this?.village.safe())
-        .setTaluka(this?.taluka.safe())
-        .setDistrict(this?.district.safe())
-        .setMaternalDetail(this?.maternalDetail.safe())
+        .setMaritalStatus(maritalStatus.safe())
+        .setLastDonated(lastDonated.safe())
+        .setBloodGroup(bloodGroup.safe())
+        .setDonateBlood(donateBlood.safe())
 
-        .setBrother(this?.brother.safe())
-        .setSister(this?.sister.safe())
-        .setMaritalStatus(this?.maritalStatus.safe())
+        .setCreatedAt(createdAt.safe())
+        .setUpdatedAt(updatedAt.safe())
 
-        .setCreatedAt(this?.createdAt.safe())
-        .setUpdatedAt(this?.updatedAt.safe())
-        .setLastDonated(this?.lastDonated.safe())
+        .setBusinessName(businessName.safe())
+        .setBusinessAddress(businessAddress.safe())
+        .setBusinessContact(businessContact.safe())
 
+        .setOtherDetail(otherDetail.safe())
+        .setHeight(height.safe())
+        .setWeight(weight.safe())
+        .setZodiac(zodiac.safe())
+
+        .setEducation(education.safe())
+        .setOccupation(occupation.safe())
+
+        .setBrother(brother.safe())
+        .setSister(sister.safe())
+
+        .setMaternalDetail(maternalDetail.safe())
+        .setPropertyDetail(propertyDetail.safe())
+
+        .setIsAdmin(isAdmin.safe())
         .build()
 
+// --------------------------------------------------
+// Banner → BannerProto
+// --------------------------------------------------
+fun BannersItem.toProto(): BannerProto =
+    BannerProto.newBuilder()
+        .setId(id.safe())
+        .setImage(image.safe())
+        .build()
+
+// --------------------------------------------------
 // LoginResponse → LoginResponseProto
-fun LoginResponse?.toProto(): LoginResponseProto =
-    LoginResponseProto.newBuilder()
-        .setStatus(this?.status.safe())
-        .setMessage(this?.message.safe())
-        .setToken(this?.token.safe())
-        .setUser(this?.user.toProto())
-        .build()
+// --------------------------------------------------
+fun LoginResponse.toProto(): LoginResponseProto {
+    val builder = LoginResponseProto.newBuilder()
+        .setStatus(status.safe())
+        .setMessage(message.safe())
+        .setToken(token.safe())
+
+    user?.let {
+        builder.setUser(it.toProto())
+    }
+
+    banners?.forEach {
+        builder.addBanners(it.toProto())
+    }
+
+    return builder.build()
+}

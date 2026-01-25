@@ -2,6 +2,8 @@ package com.ramanifamily.common
 
 import android.util.Log
 import android.util.Patterns
+import com.ramanifamily.data.remote.ApiErrorParser
+import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -43,5 +45,13 @@ object Utils {
         return age.coerceAtLeast(0).toString()
     }
 
+    fun isValidPassword(password: String): Boolean {
+        return password.length >= 8 &&
+                password.any { it.isDigit() } &&
+                password.any { it.isLetter() }
+    }
 
+    fun parseError(response: Response<*>): String {
+        return ApiErrorParser.parse(response.errorBody()?.string())
+    }
 }

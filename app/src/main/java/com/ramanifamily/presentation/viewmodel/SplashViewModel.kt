@@ -11,7 +11,7 @@ class SplashViewModel(
 ) : ViewModel() {
 
     val isLoggedIn: StateFlow<Boolean> =
-        repository.loginResponseFlow
+        repository.getLoginResponse()
             .map { it.token.isNotEmpty() }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 }

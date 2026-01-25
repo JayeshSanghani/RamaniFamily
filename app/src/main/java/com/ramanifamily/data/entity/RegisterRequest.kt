@@ -3,28 +3,30 @@ package com.ramanifamily.data.entity
 import com.google.gson.annotations.SerializedName
 
 data class RegisterRequest(
-    @SerializedName("village_id")
-    val villageId: Int = 0,
-    @SerializedName("taluka_id")
-    val talukaId: Int = 0,
     @SerializedName("mobile")
     val mobile: String = "",
     @SerializedName("middle_name")
     val middleName: String = "",
+    @SerializedName("sub_district_name")
+    val subDistrictName: String = "",
+    @SerializedName("district_name")
+    val districtName: String = "",
     @SerializedName("marital_status")
     val maritalStatus: String = "",
     @SerializedName("password")
     val password: String = "",
+    @SerializedName("state_name")
+    val stateName: String = "",
     @SerializedName("surname")
     val surname: String = "",
-    @SerializedName("district")
-    val district: String = "",
-    @SerializedName("taluka")
-    val taluka: String = "",
+    @SerializedName("sub_district_id")
+    val subDistrictId: String = "",
     @SerializedName("blood_group")
     val bloodGroup: String = "",
+    @SerializedName("state_id")
+    val stateId: String = "",
     @SerializedName("district_id")
-    val districtId: Int = 0,
+    val districtId: String = "",
     @SerializedName("village")
     val village: String = "",
     @SerializedName("first_name")

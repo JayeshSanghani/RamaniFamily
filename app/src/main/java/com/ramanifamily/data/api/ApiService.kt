@@ -1,21 +1,37 @@
 package com.ramanifamily.data.api
 
+import com.ramanifamily.data.entity.AddMemberRequest
+import com.ramanifamily.data.entity.AddMemberResponse
+import com.ramanifamily.data.entity.CommonIdName
 import com.ramanifamily.data.entity.LoginRequest
 import com.ramanifamily.data.entity.LoginResponse
+import com.ramanifamily.data.entity.MemberListRequest
+import com.ramanifamily.data.entity.MemberListResponse
 import com.ramanifamily.data.entity.RegisterRequest
 import com.ramanifamily.data.entity.RegisterResponse
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 
 interface ApiService {
-
-    @POST("register")
-    suspend fun register(@Body body: RegisterRequest): Response<RegisterResponse>
 
     @POST("login")
     suspend fun login(@Body body: LoginRequest): Response<LoginResponse>
 
-//    @GET("users")
-//    suspend fun getUsers(): Response<List<UserEntity>>
+    @POST("register")
+    suspend fun register(@Body body: RegisterRequest): Response<RegisterResponse>
+
+    @GET("districts/{stateId}")
+    suspend fun getDistricts(@Path("stateId") stateId: Int): Response<CommonIdName>
+
+    @GET("sub-districts/{districtId}")
+    suspend fun getSubDistricts(@Path("districtId") districtId: Int): Response<CommonIdName>
+
+    @POST("family-member/add")
+    suspend fun addMember(@Body body: AddMemberRequest): Response<AddMemberResponse>
+
+    @POST("family/list")
+    suspend fun memberList(@Body body: MemberListRequest): Response<MemberListResponse>
 }

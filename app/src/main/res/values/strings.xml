@@ -15,15 +15,18 @@
     <string name="str_firstname">First name</string>
     <string name="ent_firstname">Enter First name</string>
     <string name="str_middlename">Middle name</string>
-    <string name="ent_middlename">Middle  name</string>
+    <string name="ent_middlename">Enter Middle  name</string>
     <string name="str_surname">Surname</string>
     <string name="ent_surname">Enter surname</string>
     <string name="str_district">District</string>
     <string name="sel_district">Select district</string>
+    <string name="str_sub_district">Sub district</string>
+    <string name="sel_sub_district">Select sub district</string>
     <string name="str_taluka">Taluka</string>
     <string name="sel_taluka">Select taluka</string>
     <string name="str_village">Village</string>
     <string name="sel_village">Select village</string>
+    <string name="ent_village">Enter village</string>
     <string name="str_marital_status">Marital status</string>
     <string name="str_sel_marital_status">Select Marital status</string>
     <string name="str_blood_group">Blood Group</string>
@@ -32,6 +35,7 @@
     <string name="ent_mobile_no">Enter mobile Number</string>
     <string name="str_password">Password</string>
     <string name="ent_password">Enter password</string>
+    <string name="validate_password">Password must be at least 8 characters and contain letters &amp; digits</string>
     <string name="ent_mobile">Enter 10 digit mobile no</string>
     <string name="str_dont">Don\'t have an accout?</string>
     <string name="str_signup">Sign up</string>

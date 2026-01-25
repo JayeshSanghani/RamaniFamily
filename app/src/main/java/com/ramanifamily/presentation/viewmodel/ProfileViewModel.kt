@@ -9,6 +9,8 @@ class ProfileViewModel(
     private val userDataStoreRepository: UserDataStoreRepository
 ) : ViewModel() {
 
+    val userProfile = userDataStoreRepository.getLoginResponse()
+
     fun logout(onComplete: () -> Unit) {
         viewModelScope.launch {
             userDataStoreRepository.clear()

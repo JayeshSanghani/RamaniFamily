@@ -1,16 +1,36 @@
 package com.ramanifamily.presentation.profile
 
-import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,41 +46,75 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.ramanifamily.R
-import com.ramanifamily.common.*
+import com.ramanifamily.common.AppOutlinedDropdownField
+import com.ramanifamily.common.AppOutlinedTextField
+import com.ramanifamily.common.CustomButton
+import com.ramanifamily.common.LoadingOverlay
+import com.ramanifamily.common.ToastUtils
+import com.ramanifamily.data.entity.AddMemberRequest
+import com.ramanifamily.data.remote.ApiState
+import com.ramanifamily.data.remote.AppModule
+import com.ramanifamily.presentation.viewmodel.AddMemberViewModel
 
-/*----------------------------------------------------*/
-/* ENTRY */
-/*----------------------------------------------------*/
 @Composable
 fun AddFamilyMemberScreen(
     navController: NavController
 ) {
     AddFamilyMemberScreenContent(
+        navController = navController,
         onBackClick = { navController.navigateUp() }
     )
 }
 
-/*----------------------------------------------------*/
-/* SCREEN + STATE */
-/*----------------------------------------------------*/
 @Composable
 fun AddFamilyMemberScreenContent(
+    navController: NavController,
     onBackClick: () -> Unit,
     isPreview: Boolean = false
 ) {
     val view = if (!isPreview) LocalView.current else null
     val context = view?.context
 
-    var profileImage by remember { mutableStateOf<Uri?>(null) }
     var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
+    var surName by remember { mutableStateOf("") }
     var relationship by remember { mutableStateOf("") }
     var selectedGender by remember { mutableStateOf("") }
     var mobile by remember { mutableStateOf("") }
     var selectedBloodGroup by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
 
+    val viewModel = remember {
+        AddMemberViewModel(addMemberUseCase = AppModule.addMemberUseCase, networkChecker = AppModule.networkChecker)
+    }
+
+    val addMemberState by viewModel.addMemberState.collectAsState()
+    LaunchedEffect(addMemberState) {
+        when (addMemberState) {
+            is ApiState.Success -> {
+
+                //Notify Dashboard that member added
+                navController.previousBackStackEntry
+                    ?.savedStateHandle
+                    ?.set("member_added", true)
+
+                viewModel.resetState()
+                navController.popBackStack()
+            }
+
+            is ApiState.Error -> {
+                ToastUtils.show(context!!, (addMemberState as ApiState.Error).message)
+                viewModel.resetState()
+            }
+
+            else -> Unit
+        }
+    }
+
+    val isLoading = addMemberState is ApiState.Loading
+
+    Box(modifier = Modifier.fillMaxSize()) {
     Scaffold(
         containerColor = Color.White,
 
@@ -74,13 +128,10 @@ fun AddFamilyMemberScreenContent(
                     if (context == null) return@AddFamilyMemberSaveButtonBar
 
                     when {
-                        profileImage == null ->
-                            ToastUtils.show(context, R.string.str_sel_image)
-
                         firstName.isBlank() ->
                             ToastUtils.show(context, R.string.ent_firstname)
 
-                        lastName.isBlank() ->
+                        surName.isBlank() ->
                             ToastUtils.show(context, R.string.ent_surname)
 
                         relationship.isBlank() ->
@@ -96,14 +147,28 @@ fun AddFamilyMemberScreenContent(
                             ToastUtils.show(context, R.string.str_sel_blood_group)
 
                         else -> {
-                            FamilyMemberStore.members.add(
-                                FamilyMember(
-                                    image = profileImage,
-                                    fullName = "$firstName $lastName",
-                                    relation = relationship
-                                )
+
+                            val TAG = "AddFamilyMemberScreen"
+                            Log.e(TAG, firstName)
+                            Log.e(TAG, surName)
+                            Log.e(TAG, relationship)
+                            Log.e(TAG, selectedGender)
+                            Log.e(TAG, mobile)
+                            Log.e(TAG, selectedBloodGroup)
+                            Log.e(TAG, notes)
+
+                            val request = AddMemberRequest(
+                                firstName = firstName,
+                                surname = surName,
+                                relation = relationship,
+                                gender = selectedGender,
+                                mobile = mobile,
+                                bloodGroup = selectedBloodGroup,
+                                notes = notes
                             )
-                            onBackClick()
+
+                            viewModel.addMember(request)
+
                         }
                     }
                 }
@@ -113,12 +178,10 @@ fun AddFamilyMemberScreenContent(
 
         AddFamilyMemberForm(
             modifier = Modifier.padding(innerPadding),
-            profileImage = profileImage,
-            onImageChange = { profileImage = it },
             firstName = firstName,
             onFirstNameChange = { firstName = it },
-            lastName = lastName,
-            onLastNameChange = { lastName = it },
+            surName = surName,
+            onSurNameChange = { surName = it },
             relationship = relationship,
             onRelationshipChange = { relationship = it },
             selectedGender = selectedGender,
@@ -131,20 +194,19 @@ fun AddFamilyMemberScreenContent(
             onNotesChange = { notes = it }
         )
     }
+
+    val isLoading = addMemberState is ApiState.Loading
+    LoadingOverlay(isLoading = isLoading)
+    }
 }
 
-/*----------------------------------------------------*/
-/* FORM ONLY (NO SCAFFOLD) */
-/*----------------------------------------------------*/
 @Composable
 fun AddFamilyMemberForm(
     modifier: Modifier = Modifier,
-    profileImage: Uri?,
-    onImageChange: (Uri?) -> Unit,
     firstName: String,
     onFirstNameChange: (String) -> Unit,
-    lastName: String,
-    onLastNameChange: (String) -> Unit,
+    surName: String,
+    onSurNameChange: (String) -> Unit,
     relationship: String,
     onRelationshipChange: (String) -> Unit,
     selectedGender: String,
@@ -167,17 +229,11 @@ fun AddFamilyMemberForm(
             .verticalScroll(rememberScrollState())
     ) {
 
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            ProfileImagePicker(
-                imageUri = profileImage,
-                onImageSelected = onImageChange
-            )
-        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         AppOutlinedTextField(firstName, onFirstNameChange, stringResource(R.string.str_firstname))
-        AppOutlinedTextField(lastName, onLastNameChange, stringResource(R.string.str_surname))
+        AppOutlinedTextField(surName, onSurNameChange, stringResource(R.string.str_surname))
 
         AppOutlinedDropdownField(
             value = relationship,
@@ -220,9 +276,6 @@ fun AddFamilyMemberForm(
     }
 }
 
-/*----------------------------------------------------*/
-/* TOOLBAR */
-/*----------------------------------------------------*/
 @Composable
 fun AddFamilyMemberToolbar(
     onBackClick: () -> Unit
@@ -260,9 +313,6 @@ fun AddFamilyMemberToolbar(
     }
 }
 
-/*----------------------------------------------------*/
-/* SAVE BUTTON */
-/*----------------------------------------------------*/
 @Composable
 fun AddFamilyMemberSaveButtonBar(
     onSaveClick: () -> Unit
@@ -285,14 +335,12 @@ fun AddFamilyMemberSaveButtonBar(
     }
 }
 
-/*----------------------------------------------------*/
-/* PREVIEW */
-/*----------------------------------------------------*/
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun AddFamilyMemberPreview() {
     androidx.compose.material3.Surface {
         AddFamilyMemberScreenContent(
+            navController = rememberNavController(),
             onBackClick = {},
             isPreview = true
         )

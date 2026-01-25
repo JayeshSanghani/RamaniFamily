@@ -9,6 +9,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.ramanifamily.presentation.AppNavigation
 import com.ramanifamily.ui.theme.RamaniFamilyTheme
 
+//@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

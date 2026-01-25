@@ -26,6 +26,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.ramanifamily.R
 import com.ramanifamily.presentation.viewmodel.ProfileViewModel
 import com.ramanifamily.presentation.viewmodel.ProfileViewModelFactory
@@ -48,8 +51,21 @@ import com.ramanifamily.presentation.viewmodel.ProfileViewModelFactory
 @Composable
 fun ProfileScreen(navController: NavController,
                   viewModel: ProfileViewModel = viewModel(factory = ProfileViewModelFactory())) {
+
+    val userState by viewModel.userProfile.collectAsState(initial = null)
+    val user = userState?.user
+
     ProfileScreenContent(
-        onBackClick = { navController.navigateUp() },
+        userName = listOf(
+            user?.firstName,
+            user?.middleName,
+            user?.surname
+        ).filter { !it.isNullOrBlank() }
+            .joinToString(" ")
+            .ifEmpty { "User Name" },
+
+        profileImageUrl = user?.profileImg,
+        onBackClick = {  navController.popBackStack() },
         onPersonalClick = { navController.navigate("personal_details") },
         onBusinessClick = { navController.navigate("business_details") },
         onMaritalClick = { navController.navigate("marital_details") },
@@ -67,6 +83,8 @@ fun ProfileScreen(navController: NavController,
 }
 @Composable
 fun ProfileScreenContent(
+    userName: String,
+    profileImageUrl: String?,
     onBackClick: () -> Unit,
     onPersonalClick: () -> Unit,
     onBusinessClick: () -> Unit,
@@ -88,8 +106,8 @@ fun ProfileScreenContent(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            Image(
-                painter = painterResource(R.drawable.profilepic),
+            AsyncImage(
+                model = profileImageUrl ?: R.drawable.profilepic,
                 contentDescription = null,
                 modifier = Modifier
                     .size(120.dp)
@@ -100,7 +118,7 @@ fun ProfileScreenContent(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "User Name",
+                text = userName,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Medium,
                 color = Color.Gray
@@ -239,6 +257,8 @@ fun ProfileScreenPreview() {
     MaterialTheme {
         Surface {
             ProfileScreenContent(
+                userName = "John Doe",
+                profileImageUrl = null,
                 onBackClick = {},
                 onPersonalClick = {},
                 onBusinessClick = {},

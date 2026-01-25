@@ -62,6 +62,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ramanifamily.common.LoadingOverlay
+import com.ramanifamily.common.Utils
 import com.ramanifamily.data.entity.RegisterRequest
 import com.ramanifamily.data.remote.ApiState
 import com.ramanifamily.data.remote.AppModule
@@ -90,25 +91,13 @@ fun RegistrationScreen( navController: NavController) {
     var mName by remember { mutableStateOf("") }
     var surname by remember { mutableStateOf("") }
     var district by remember { mutableStateOf("") }
-    var taluka by remember { mutableStateOf("") }
+    var subDistrict by remember { mutableStateOf("") }
     var village by remember { mutableStateOf("") }
     var maritalStatus by remember { mutableStateOf("") }
     var bloodGroup by remember { mutableStateOf("") }
     var mobileNo by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
-
-    val districtList = remember {
-        listOf("District 1", "District 2", "District 3")
-    }
-
-    val talukaList = remember {
-        listOf("Taluka 1", "Taluka 2", "Taluka 3")
-    }
-
-    val villageList = remember {
-        listOf("Village 1", "Village 2", "Village 3")
-    }
 
     val maritalStatusList = remember {
         listOf("Married", "Unmarried", "Divorced")
@@ -118,8 +107,23 @@ fun RegistrationScreen( navController: NavController) {
         listOf("A+", "O+", "B+", "AB+", "A-", "O-", "B-", "AB-")
     }
 
-    val viewModel: RegisterViewModel = viewModel(factory = RegisterViewModelFactory(AppModule.registerUserUseCase, AppModule.networkChecker))
+    val viewModel: RegisterViewModel = viewModel(
+        factory = RegisterViewModelFactory(
+            AppModule.registerUserUseCase,
+            AppModule.getDistrictsUseCase,
+            AppModule.getSubDistrictsUseCase,
+            AppModule.networkChecker
+        )
+    )
     val registerState by viewModel.registerState.collectAsState()
+    val districtsState by viewModel.districtsState.collectAsState()
+    val subDistrictsState by viewModel.subDistrictsState.collectAsState()
+    var selectedDistrictId by remember { mutableStateOf<Int?>(null) }
+    var selectedSubDistrictId by remember { mutableStateOf<Int?>(null) }
+
+    LaunchedEffect(Unit) {
+        viewModel.getDistricts(stateId = 1) // Gujarat
+    }
 
     LaunchedEffect(registerState) {
         when (registerState) {
@@ -159,32 +163,37 @@ fun RegistrationScreen( navController: NavController) {
                             mName.isBlank() -> ToastUtils.show(context, R.string.ent_middlename)
                             surname.isBlank() -> ToastUtils.show(context, R.string.ent_surname)
                             district.isBlank() -> ToastUtils.show(context, R.string.sel_district)
-                            taluka.isBlank() -> ToastUtils.show(context, R.string.sel_taluka)
-                            village.isBlank() -> ToastUtils.show(context, R.string.sel_village)
+                            subDistrict.isBlank() -> ToastUtils.show(context, R.string.sel_sub_district)
+                            village.isBlank() -> ToastUtils.show(context, R.string.ent_village)
                             maritalStatus.isBlank() -> ToastUtils.show(context, R.string.str_sel_marital_status)
                             bloodGroup.isBlank() -> ToastUtils.show(context, R.string.str_sel_blood_group)
                             mobileNo.isBlank() -> ToastUtils.show(context, R.string.ent_mobile_no)
                             mobileNo.length != 10 -> ToastUtils.show(context, R.string.ent_mobile)
                             password.isBlank() -> ToastUtils.show(context, R.string.ent_password)
+                            !Utils.isValidPassword(password) ->  ToastUtils.show(context, R.string.validate_password)
                             else -> {
                                 val TAG = "Reg"
-                                Log.e(TAG, fName)
-                                Log.e(TAG, mName)
-                                Log.e(TAG, surname)
-                                Log.e(TAG, district)
-                                Log.e(TAG, taluka)
-                                Log.e(TAG, village)
-                                Log.e(TAG, maritalStatus)
-                                Log.e(TAG, bloodGroup)
-                                Log.e(TAG, mobileNo)
-                                Log.e(TAG, password)
+//                                Log.e(TAG, fName)
+//                                Log.e(TAG, mName)
+//                                Log.e(TAG, surname)
+//                                Log.e(TAG, district)
+//                                Log.e(TAG, taluka)
+//                                Log.e(TAG, village)
+//                                Log.e(TAG, maritalStatus)
+//                                Log.e(TAG, bloodGroup)
+//                                Log.e(TAG, mobileNo)
+//                                Log.e(TAG, password)
 
                                 val request = RegisterRequest(
                                     firstName = fName,
                                     middleName = mName,
                                     surname = surname,
-                                    district = district,
-                                    taluka = taluka,
+                                    stateId = "1",
+                                    stateName = "Gujarat",
+                                    districtId = selectedDistrictId?.toString().orEmpty(),
+                                    districtName = district,
+                                    subDistrictId = selectedSubDistrictId?.toString().orEmpty(),
+                                    subDistrictName = subDistrict,
                                     village = village,
                                     maritalStatus = maritalStatus,
                                     bloodGroup = bloodGroup,
@@ -232,28 +241,67 @@ fun RegistrationScreen( navController: NavController) {
                 label = stringResource(R.string.str_surname)
             )
 
+            val districtOptions =
+                (districtsState as? ApiState.Success)
+                    ?.data
+                    ?.data
+                    ?.map { it.name }
+                    ?: emptyList()
             AppOutlinedDropdownField(
                 value = district,
                 label = stringResource(R.string.sel_district),
-                options = districtList,
+                options = districtOptions,
                 trailingIcon = painterResource(R.drawable.ic_down_arrow_fill),
-                onValueChange = { district = it }
+                onValueChange = { selectedName ->
+                    district = selectedName
+
+                    val selectedDistrict =
+                        (districtsState as? ApiState.Success)
+                            ?.data
+                            ?.data
+                            ?.firstOrNull { it.name == selectedName }
+
+                    selectedDistrict?.let {
+                        selectedDistrictId = it.id        //SAVE ID
+                        viewModel.getSubDistricts(it.id)
+
+                        // reset sub-district
+                        subDistrict = ""
+                        selectedSubDistrictId = null
+                    }
+                }
             )
 
+            val subDistrictOptions =
+                (subDistrictsState as? ApiState.Success)
+                    ?.data
+                    ?.data
+                    ?.map { it.name }
+                    ?: emptyList()
             AppOutlinedDropdownField(
-                value = taluka,
-                label = stringResource(R.string.sel_taluka),
-                options = talukaList,
+                value = subDistrict,
+                label = stringResource(R.string.sel_sub_district),
+                options = subDistrictOptions,
                 trailingIcon = painterResource(R.drawable.ic_down_arrow_fill),
-                onValueChange = { taluka = it }
+                onValueChange = { selectedName ->
+                    subDistrict = selectedName
+
+                    val selectedSubDistrict =
+                        (subDistrictsState as? ApiState.Success)
+                            ?.data
+                            ?.data
+                            ?.firstOrNull { it.name == selectedName }
+
+                    selectedSubDistrict?.let {
+                        selectedSubDistrictId = it.id     // SAVE ID
+                    }
+                }
             )
 
-            AppOutlinedDropdownField(
+            AppOutlinedTextField(
                 value = village,
-                label = stringResource(R.string.sel_village),
-                options = villageList,
-                trailingIcon = painterResource(R.drawable.ic_down_arrow_fill),
-                onValueChange = { village = it }
+                onValueChange = { village = it },
+                label = stringResource(R.string.str_village)
             )
 
             AppOutlinedDropdownField(
@@ -303,9 +351,11 @@ fun RegistrationScreen( navController: NavController) {
         }
     }
 
-    LoadingOverlay(
-        isLoading = registerState is ApiState.Loading
-    )
+    val isLoading = registerState is ApiState.Loading ||
+                districtsState is ApiState.Loading ||
+                subDistrictsState is ApiState.Loading
+
+    LoadingOverlay(isLoading = isLoading)
 }
 
 @Composable

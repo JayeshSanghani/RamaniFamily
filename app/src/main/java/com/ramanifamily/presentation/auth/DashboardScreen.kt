@@ -1,25 +1,11 @@
 package com.ramanifamily.presentation.auth
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -27,6 +13,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,25 +33,34 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.ramanifamily.R
-import com.ramanifamily.common.DotIndicator
 import com.ramanifamily.common.ParallaxImageSlider
-import com.ramanifamily.presentation.profile.FamilyMember
-import com.ramanifamily.presentation.profile.FamilyMemberStore
+import com.ramanifamily.data.entity.MemberListDataItem
+import com.ramanifamily.presentation.viewmodel.DashboardViewModel
+import kotlinx.coroutines.flow.collect
 
 @Composable
-fun DashboardScreen(navController: NavController) {
+fun DashboardScreen(
+    navController: NavController,
+    viewModel: DashboardViewModel
+) {
+    val uiState = viewModel.uiState.collectAsState().value
 
-    val sliderImages = listOf(
-        R.drawable.banner1,
-        R.drawable.banner2,
-        R.drawable.banner3
-    )
+    //Listen for "member_added" result from AddFamilyMemberScreen
+    LaunchedEffect(navController) {
+        navController.currentBackStackEntryFlow.collect { backStackEntry ->
+            val added = backStackEntry.savedStateHandle.get<Boolean>("member_added") ?: false
+            if (added) {
+                viewModel.refreshMembers()
+                backStackEntry.savedStateHandle.set("member_added", false)
+            }
+        }
+    }
 
     Scaffold(
         containerColor = Color.White,
         topBar = {
-            DashboardToolBar(navController) {
-                // handle add click
+            DashboardToolBar(navController,
+                profileImageUrl = uiState.profileImage) {
                 navController.navigate("add_family_member")
             }
         }
@@ -76,7 +73,7 @@ fun DashboardScreen(navController: NavController) {
         ) {
 
             ParallaxImageSlider(
-                images = sliderImages,
+                images = uiState.bannerImages,
                 modifier = Modifier.padding(top = 12.dp)
             )
 
@@ -88,18 +85,16 @@ fun DashboardScreen(navController: NavController) {
                     .padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(FamilyMemberStore.members) { member ->
+                items(uiState.members) { member ->
                     FamilyMemberItem(member)
                 }
             }
-
-
         }
     }
 }
 
 @Composable
-fun FamilyMemberItem(member: FamilyMember) {
+fun FamilyMemberItem(member: MemberListDataItem) {
     Card(
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(4.dp),
@@ -113,20 +108,11 @@ fun FamilyMemberItem(member: FamilyMember) {
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            Image(
-                painter = rememberAsyncImagePainter(member.image),
-                contentDescription = "Member Image",
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
-
             Spacer(modifier = Modifier.width(12.dp))
 
             Column {
                 Text(
-                    text = member.fullName,
+                    text = "${member.firstName} ${member.surname}",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
@@ -144,11 +130,11 @@ fun FamilyMemberItem(member: FamilyMember) {
     }
 }
 
-
 @Composable
 fun DashboardToolBar(
     navController: NavController,
-    onAddClick: () -> Unit  // Add click callback parameter
+    profileImageUrl: String,
+    onAddClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -161,14 +147,19 @@ fun DashboardToolBar(
     ) {
 
         Image(
-            painter = painterResource(id = R.drawable.profilepic),
+            painter = rememberAsyncImagePainter(
+                model = profileImageUrl,
+                placeholder = painterResource(R.drawable.profilepic),
+                error = painterResource(R.drawable.profilepic)
+            ),
             contentDescription = "Profile",
             modifier = Modifier
                 .size(32.dp)
                 .clip(CircleShape)
                 .clickable {
                     navController.navigate("profile")
-                }
+                },
+            contentScale = ContentScale.Crop
         )
 
         Spacer(modifier = Modifier.width(12.dp))
@@ -182,9 +173,8 @@ fun DashboardToolBar(
             textAlign = TextAlign.Center
         )
 
-        // Plus icon
         Image(
-            painter = painterResource(R.drawable.ic_add), // use your white PNG
+            painter = painterResource(R.drawable.ic_add),
             contentDescription = "Add Item",
             modifier = Modifier
                 .size(28.dp)
@@ -193,11 +183,12 @@ fun DashboardToolBar(
     }
 }
 
-
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun DashboardScreenPreview() {
-    DashboardScreen(
-        navController = rememberNavController()
-    )
+fun DashboardPreview() {
+//    DashboardScreen(
+//        navController = rememberNavController(),
+//        viewModel = FakeDashboardViewModel()
+//    )
 }
+

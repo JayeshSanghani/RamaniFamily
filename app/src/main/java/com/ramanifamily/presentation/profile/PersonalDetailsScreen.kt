@@ -40,12 +40,20 @@ import com.ramanifamily.common.Utils
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.navigationBars
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ramanifamily.common.LoadingOverlay
+import com.ramanifamily.data.remote.ApiState
+import com.ramanifamily.data.remote.AppModule.getDistrictsUseCase
+import com.ramanifamily.data.remote.AppModule.getSubDistrictsUseCase
+import com.ramanifamily.data.remote.AppModule.networkChecker
+import com.ramanifamily.data.remote.AppModule.userDataStoreRepository
+import com.ramanifamily.presentation.viewmodel.PersonalDetailsViewModel
+import com.ramanifamily.presentation.viewmodel.PersonalDetailsViewModelFactory
 
 
 @Composable
 fun PersonalDetailsScreen(
-    navController: NavController
-) {
+    navController: NavController) {
     PersonalDetailsScreenContent(
         onBackClick = { navController.navigateUp() }
     )
@@ -62,7 +70,7 @@ fun PersonalDetailsScreenContent(
     var mName by remember { mutableStateOf("") }
     var surname by remember { mutableStateOf("") }
     var district by remember { mutableStateOf("") }
-    var taluka by remember { mutableStateOf("") }
+    var subDistrict by remember { mutableStateOf("") }
     var village by remember { mutableStateOf("") }
     var currentAddress by remember { mutableStateOf("") }
     var dob by remember { mutableStateOf("") }
@@ -76,14 +84,58 @@ fun PersonalDetailsScreenContent(
     var lastDonatedDate by remember { mutableStateOf("") }
     var selectedBloodGroup by remember { mutableStateOf("") }
 
-    val districtList = listOf("District 1", "District 2", "District 3")
-    val talukaList = listOf("Taluka 1", "Taluka 2", "Taluka 3")
-    val villageList = listOf("Village 1", "Village 2", "Village 3")
+    val viewModel: PersonalDetailsViewModel = viewModel(
+        factory = PersonalDetailsViewModelFactory(
+            userDataStoreRepository,
+            getDistrictsUseCase,
+            getSubDistrictsUseCase,
+            networkChecker
+        )
+    )
+    val userDetails by viewModel.userDetails.collectAsState()
+
+    val districtsState by viewModel.districtsState.collectAsState()
+    val subDistrictsState by viewModel.subDistrictsState.collectAsState()
+    var selectedDistrictId by remember { mutableStateOf<Int?>(null) }
+    var selectedSubDistrictId by remember { mutableStateOf<Int?>(null) }
     val genderList = listOf("Select", "Male", "Female", "Other")
     val maritalStatusList = listOf("Select", "Married", "Unmarried", "Divorced")
     val bloodGroupList = listOf("A+", "O+", "B+", "AB+", "A-", "O-", "B-", "AB-")
 
-    var profileImage by remember { mutableStateOf<Uri?>(null) }
+//    var profileImage by remember { mutableStateOf<Uri?>(null) }
+
+    LaunchedEffect(Unit) {
+        viewModel.getDistricts(stateId = 1) // Gujarat
+    }
+
+    LaunchedEffect(userDetails) {
+        userDetails?.let { user ->
+
+            fName = user.user.firstName
+            mName = user.user.middleName
+            surname = user.user.surname
+
+            district = user.user.districtName
+            subDistrict = user.user.subDistrictName
+            village = user.user.village
+            currentAddress = user.user.address
+
+            dob = user.user.dob
+            age = Utils.calculateAge(user.user.dob)
+
+            mobile = user.user.mobile
+            showNumber = user.user.showNumber
+
+            email = user.user.email
+            selectedGender = user.user.gender
+            selectedMaritalStatus = user.user.maritalStatus
+
+            lastDonatedDate = user.user.lastDonated
+            selectedBloodGroup = user.user.bloodGroup
+            donateBlood = user.user.donateBlood
+        }
+    }
+
 
     Scaffold(
         containerColor = Color.White,
@@ -96,13 +148,13 @@ fun PersonalDetailsScreenContent(
             SaveButtonBar(
                 onSaveClick = {
                     when {
-                        profileImage == null -> ToastUtils.show(context, R.string.str_sel_image)
+//                        profileImage == null -> ToastUtils.show(context, R.string.str_sel_image)
                         fName.isBlank() -> ToastUtils.show(context, R.string.ent_firstname)
                         mName.isBlank() -> ToastUtils.show(context, R.string.ent_middlename)
                         surname.isBlank() -> ToastUtils.show(context, R.string.ent_surname)
                         district.isBlank() -> ToastUtils.show(context, R.string.sel_district)
-                        taluka.isBlank() -> ToastUtils.show(context, R.string.sel_taluka)
-                        village.isBlank() -> ToastUtils.show(context, R.string.sel_village)
+                        subDistrict.isBlank() -> ToastUtils.show(context, R.string.sel_sub_district)
+                        village.isBlank() -> ToastUtils.show(context, R.string.ent_village)
                         currentAddress.isBlank() -> ToastUtils.show(context, R.string.ent_current_add)
                         dob.isBlank() -> ToastUtils.show(context, R.string.ent_date_of_birth)
                         mobile.isBlank() -> ToastUtils.show(context, R.string.ent_mobile_no)
@@ -116,12 +168,13 @@ fun PersonalDetailsScreenContent(
                         else -> {
                             val TAG = "PersonalDetails"
 
-                            Log.e(TAG, "Profile Image Uri: $profileImage")
                             Log.e(TAG, "First Name: $fName")
                             Log.e(TAG, "Middle Name: $mName")
                             Log.e(TAG, "Surname: $surname")
                             Log.e(TAG, "District: $district")
-                            Log.e(TAG, "Taluka: $taluka")
+                            Log.e(TAG, "selectedDistrictId: $selectedDistrictId")
+                            Log.e(TAG, "SunDistrict: $subDistrict")
+                            Log.e(TAG, "selectedSubDistrictId: $selectedSubDistrictId")
                             Log.e(TAG, "Village: $village")
                             Log.e(TAG, "Current Address: $currentAddress")
                             Log.e(TAG, "DOB: $dob")
@@ -134,7 +187,7 @@ fun PersonalDetailsScreenContent(
                             Log.e(TAG, "Donate Blood: $donateBlood")
                             Log.e(TAG, "Last Donated Date: $lastDonatedDate")
                             Log.e(TAG, "Blood Group: $selectedBloodGroup")
-                            Log.e(TAG, "Profile Image Uri: $profileImage")
+//                            Log.e(TAG, "Profile Image Uri: $profileImage")
 
                             onBackClick()
                         }
@@ -154,42 +207,105 @@ fun PersonalDetailsScreenContent(
             horizontalAlignment = Alignment.Start
         ) {
 
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                ProfileImagePicker(
-                    imageUri = profileImage,
-                    onImageSelected = { profileImage = it }
-                )
-            }
+//            Box(
+//                modifier = Modifier.fillMaxWidth(),
+//                contentAlignment = Alignment.Center
+//            ) {
+//                ProfileImagePicker(
+//                    imageUri = profileImage,
+//                    onImageSelected = { profileImage = it }
+//                )
+//            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             AppOutlinedTextField(fName, { fName = it }, stringResource(R.string.str_firstname))
             AppOutlinedTextField(mName, { mName = it }, stringResource(R.string.str_middlename))
             AppOutlinedTextField(surname, { surname = it }, stringResource(R.string.str_surname))
 
+            val districtOptions =
+                (districtsState as? ApiState.Success)
+                    ?.data
+                    ?.data
+                    ?.map { it.name }
+                    ?: emptyList()
             AppOutlinedDropdownField(
                 value = district,
                 label = stringResource(R.string.sel_district),
-                options = districtList,
-                trailingIcon = painterResource(R.drawable.ic_down_arrow_fill)
-            ) { district = it }
+                options = districtOptions,
+                trailingIcon = painterResource(R.drawable.ic_down_arrow_fill),
+                onValueChange = { selectedName ->
+                    district = selectedName
 
-            AppOutlinedDropdownField(
-                value = taluka,
-                label = stringResource(R.string.sel_taluka),
-                options = talukaList,
-                trailingIcon = painterResource(R.drawable.ic_down_arrow_fill)
-            ) { taluka = it }
+                    val selectedDistrict =
+                        (districtsState as? ApiState.Success)
+                            ?.data
+                            ?.data
+                            ?.firstOrNull { it.name == selectedName }
 
+                    selectedDistrict?.let {
+                        selectedDistrictId = it.id        //SAVE ID
+                        viewModel.getSubDistricts(it.id)
+
+                        // reset sub-district
+                        subDistrict = ""
+                        selectedSubDistrictId = null
+                    }
+                }
+            )
+
+            val subDistrictOptions =
+                (subDistrictsState as? ApiState.Success)
+                    ?.data
+                    ?.data
+                    ?.map { it.name }
+                    ?: emptyList()
             AppOutlinedDropdownField(
+                value = subDistrict,
+                label = stringResource(R.string.sel_sub_district),
+                options = subDistrictOptions,
+                trailingIcon = painterResource(R.drawable.ic_down_arrow_fill),
+                onValueChange = { selectedName ->
+                    subDistrict = selectedName
+
+                    val selectedSubDistrict =
+                        (subDistrictsState as? ApiState.Success)
+                            ?.data
+                            ?.data
+                            ?.firstOrNull { it.name == selectedName }
+
+                    selectedSubDistrict?.let {
+                        selectedSubDistrictId = it.id     // SAVE ID
+                    }
+                }
+            )
+
+            AppOutlinedTextField(
                 value = village,
-                label = stringResource(R.string.sel_village),
-                options = villageList,
-                trailingIcon = painterResource(R.drawable.ic_down_arrow_fill)
-            ) { village = it }
+                onValueChange = { village = it },
+                label = stringResource(R.string.str_village)
+            )
+
+//            AppOutlinedDropdownField(
+//                value = district,
+//                label = stringResource(R.string.sel_district),
+//                options = districtList,
+//                trailingIcon = painterResource(R.drawable.ic_down_arrow_fill)
+//            ) { district = it }
+//
+//            AppOutlinedDropdownField(
+//                value = taluka,
+//                label = stringResource(R.string.sel_taluka),
+//                options = talukaList,
+//                trailingIcon = painterResource(R.drawable.ic_down_arrow_fill)
+//            ) { taluka = it }
+//
+//            AppOutlinedDropdownField(
+//                value = village,
+//                label = stringResource(R.string.sel_village),
+//                options = villageList,
+//                trailingIcon = painterResource(R.drawable.ic_down_arrow_fill)
+//            ) { village = it }
 
             AppOutlinedTextField(
                 value = currentAddress,
@@ -201,7 +317,7 @@ fun PersonalDetailsScreenContent(
 
                 AppOutlinedDatePickerField(
                     value = dob,
-                    label = stringResource(R.string.str_date_of_birth),
+                    label = stringResource(R.string.str_lbl_date_of_birth),
                     modifier = Modifier.weight(0.8f),
                     disableFutureDates = true
                 ) { selectedDate ->
@@ -266,19 +382,11 @@ fun PersonalDetailsScreenContent(
                 ) { selectedMaritalStatus = it }
             }
 
-            AppOutlinedTextField(
-                value = lastDonatedDate,
-                onValueChange = { lastDonatedDate = it },
-                label = stringResource(R.string.str_lbl_date_of_donation)
-            )
-
-            AppOutlinedDatePickerField(
-                value = lastDonatedDate,
-                label = stringResource(R.string.str_date_of_birth),
-                disableFutureDates = true
-            ) { selectedDate ->
-                lastDonatedDate = selectedDate
-            }
+//            AppOutlinedTextField(
+//                value = lastDonatedDate,
+//                onValueChange = { lastDonatedDate = it },
+//                label = stringResource(R.string.str_lbl_date_of_donation)
+//            )
 
             AppOutlinedDropdownField(
                 value = selectedBloodGroup,
@@ -286,6 +394,14 @@ fun PersonalDetailsScreenContent(
                 trailingIcon = painterResource(R.drawable.ic_down_arrow_fill),
                 options = bloodGroupList
             ) { selectedBloodGroup = it }
+
+            AppOutlinedDatePickerField(
+                value = lastDonatedDate,
+                label = stringResource(R.string.str_lbl_date_of_donation),
+                disableFutureDates = true
+            ) { selectedDate ->
+                lastDonatedDate = selectedDate
+            }
 
             YesNoRadioGroup(
                 title = stringResource(R.string.str_donate_blood),
@@ -295,6 +411,11 @@ fun PersonalDetailsScreenContent(
 
         }
     }
+
+    val isLoading = districtsState is ApiState.Loading ||
+            subDistrictsState is ApiState.Loading
+
+    LoadingOverlay(isLoading = isLoading)
 }
 
 @Composable
@@ -396,5 +517,5 @@ fun PersonalDetailsToolbar(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun PersonalDetailsPreview() {
-    PersonalDetailsScreenContent {}
+//    PersonalDetailsScreenContent {}
 }

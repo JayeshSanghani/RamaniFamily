@@ -24,14 +24,16 @@ import kotlinx.coroutines.launch
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.graphics.graphicsLayer
+import coil.compose.rememberAsyncImagePainter
 import com.ramanifamily.R
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ParallaxImageSlider(
-    images: List<Int>,
+    images: List<String>,
     modifier: Modifier = Modifier
 ) {
+    if (images.isEmpty()) return
     val pagerState = rememberPagerState(pageCount = { images.size })
     val coroutineScope = rememberCoroutineScope()
 
@@ -86,7 +88,11 @@ fun ParallaxImageSlider(
                     }
             ) {
                 Image(
-                    painter = painterResource(images[page]),
+                    painter = rememberAsyncImagePainter(
+                        model = images[page],
+                        placeholder = painterResource(R.drawable.no_image),
+                        error = painterResource(R.drawable.no_image)
+                    ),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
