@@ -45,12 +45,23 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.ramanifamily.R
+import com.ramanifamily.data.remote.AppModule
 import com.ramanifamily.presentation.viewmodel.ProfileViewModel
 import com.ramanifamily.presentation.viewmodel.ProfileViewModelFactory
 
 @Composable
-fun ProfileScreen(navController: NavController,
-                  viewModel: ProfileViewModel = viewModel(factory = ProfileViewModelFactory())) {
+fun ProfileScreen(
+    navController: NavController,
+    viewModel: ProfileViewModel = viewModel(
+        factory = ProfileViewModelFactory(
+            userDataStoreRepository = AppModule.userDataStoreRepository,
+            profilePersonalUseCase = AppModule.profilePersonalUseCase,
+            profileBusinessUseCase = AppModule.profileBusinessUseCase,
+            profileMaritalUseCase = AppModule.profileMaritalUseCase,
+            networkChecker = AppModule.networkChecker
+        )
+    )
+) {
 
     val userState by viewModel.userProfile.collectAsState(initial = null)
     val user = userState?.user

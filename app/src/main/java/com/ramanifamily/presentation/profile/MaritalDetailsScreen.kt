@@ -34,6 +34,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import kotlin.text.isBlank
 import android.util.Log
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ramanifamily.common.LoadingOverlay
+import com.ramanifamily.data.entity.ProfileBusinessRequest
+import com.ramanifamily.data.entity.ProfileMaritalRequest
+import com.ramanifamily.data.remote.ApiState
+import com.ramanifamily.data.remote.AppModule
+import com.ramanifamily.presentation.viewmodel.ProfileViewModel
+import com.ramanifamily.presentation.viewmodel.ProfileViewModelFactory
 
 
 @Composable
@@ -74,6 +82,34 @@ fun MaritalDetailsScreenContent(onBackClick: () -> Unit) {
         )
     }
 
+    val viewModel: ProfileViewModel = viewModel(
+        factory = ProfileViewModelFactory(
+            AppModule.userDataStoreRepository,
+            AppModule.profilePersonalUseCase,
+            AppModule.profileBusinessUseCase,
+            AppModule.profileMaritalUseCase,
+            AppModule.networkChecker
+        )
+    )
+    val profileMaritalState by viewModel.profileMaritalState.collectAsState()
+    val isLoading = profileMaritalState is ApiState.Loading
+
+    LaunchedEffect(profileMaritalState) {
+        when (profileMaritalState) {
+            is ApiState.Success -> {
+                ToastUtils.show(context, (profileMaritalState as ApiState.Success).data.message)
+                viewModel.resetMaritalState()
+                onBackClick()
+            }
+
+            is ApiState.Error -> {
+                ToastUtils.show(context, (profileMaritalState as ApiState.Error).message)
+                viewModel.resetMaritalState()
+            }
+            else -> Unit
+        }
+    }
+
     Scaffold(
         containerColor = Color.White,
         topBar = { MaritalDetailsToolbar(onBackClick = onBackClick) },
@@ -104,7 +140,18 @@ fun MaritalDetailsScreenContent(onBackClick: () -> Unit) {
                             Log.e(TAG, "Maternal Detail: $maternalDetail")
                             Log.e(TAG, "Property Detail: $propertyDetail")
 
-                            onBackClick()
+                            val request = ProfileMaritalRequest(
+                                education = education,
+                                occupation = occupation,
+                                zodiac = selectedZodiac,
+                                propertyDetail = propertyDetail,
+                                weight = weight,
+                                maternalDetail = maternalDetail,
+                                brother = brother.toInt(),
+                                sister = sister.toInt(),
+                                height = height,
+                            )
+                            viewModel.maritalState(request)
                         }
                     }
                 }
@@ -112,7 +159,10 @@ fun MaritalDetailsScreenContent(onBackClick: () -> Unit) {
             )
         }
     ) { innerPadding ->
-
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -200,6 +250,8 @@ fun MaritalDetailsScreenContent(onBackClick: () -> Unit) {
                 placeholder = stringResource(R.string.ent_land)
             )
         }
+    }
+        LoadingOverlay(isLoading = isLoading)
     }
 }
 

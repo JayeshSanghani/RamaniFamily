@@ -112,8 +112,6 @@ fun AddFamilyMemberScreenContent(
         }
     }
 
-    val isLoading = addMemberState is ApiState.Loading
-
     Box(modifier = Modifier.fillMaxSize()) {
     Scaffold(
         containerColor = Color.White,

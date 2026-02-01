@@ -1,5 +1,10 @@
 package com.ramanifamily.data.remote
 
+//import dagger.Module
+//import dagger.Provides
+//import dagger.hilt.InstallIn
+//import dagger.hilt.android.qualifiers.ApplicationContext
+//import dagger.hilt.components.SingletonComponent
 import android.content.Context
 import com.ramanifamily.common.network.NetworkChecker
 import com.ramanifamily.common.network.NetworkCheckerImpl
@@ -7,32 +12,37 @@ import com.ramanifamily.data.api.ApiService
 import com.ramanifamily.data.repository.AddMemberRepositoryImpl
 import com.ramanifamily.data.repository.LoginRepositoryImpl
 import com.ramanifamily.data.repository.MemberListRepositoryImpl
+import com.ramanifamily.data.repository.ProfileBusinessRepositoryImpl
+import com.ramanifamily.data.repository.ProfileMaritalRepositoryImpl
+import com.ramanifamily.data.repository.ProfilePersonalRepositoryImpl
 import com.ramanifamily.data.repository.RegisterRepositoryImpl
 import com.ramanifamily.data.repository.UserDataStoreRepository
 import com.ramanifamily.domain.repository.AddMemberRepository
 import com.ramanifamily.domain.repository.LoginRepository
 import com.ramanifamily.domain.repository.MemberListRepository
+import com.ramanifamily.domain.repository.ProfileBusinessRepository
+import com.ramanifamily.domain.repository.ProfileMaritalRepository
+import com.ramanifamily.domain.repository.ProfilePersonalRepository
 import com.ramanifamily.domain.repository.RegisterRepository
 import com.ramanifamily.domain.usecase.AddMemberUseCase
 import com.ramanifamily.domain.usecase.GetDistrictsUseCase
 import com.ramanifamily.domain.usecase.GetSubDistrictsUseCase
 import com.ramanifamily.domain.usecase.LoginUserUseCase
 import com.ramanifamily.domain.usecase.MemberListUseCase
+import com.ramanifamily.domain.usecase.ProfileBusinessUseCase
+import com.ramanifamily.domain.usecase.ProfileMaritalUseCase
+import com.ramanifamily.domain.usecase.ProfilePersonalUseCase
 import com.ramanifamily.domain.usecase.RegisterUserUseCase
-//import dagger.Module
-//import dagger.Provides
-//import dagger.hilt.InstallIn
-//import dagger.hilt.android.qualifiers.ApplicationContext
-//import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
-import okhttp3.Interceptor
-import okhttp3.Response
+
 //import javax.inject.Singleton
 
 //@Module
@@ -107,6 +117,30 @@ object AppModule {
 
     val memberListUseCase: MemberListUseCase by lazy {
         MemberListUseCase(memberListRepository)
+    }
+
+    val profilePersonalRepository: ProfilePersonalRepository by lazy {
+        ProfilePersonalRepositoryImpl(apiService)
+    }
+
+    val profilePersonalUseCase: ProfilePersonalUseCase by lazy {
+        ProfilePersonalUseCase(profilePersonalRepository)
+    }
+
+    val profileBusinessRepository: ProfileBusinessRepository by lazy {
+        ProfileBusinessRepositoryImpl(apiService)
+    }
+
+    val profileBusinessUseCase: ProfileBusinessUseCase by lazy {
+        ProfileBusinessUseCase(profileBusinessRepository)
+    }
+
+    val profileMaritalRepository: ProfileMaritalRepository by lazy {
+        ProfileMaritalRepositoryImpl(apiService)
+    }
+
+    val profileMaritalUseCase: ProfileMaritalUseCase by lazy {
+        ProfileMaritalUseCase(profileMaritalRepository)
     }
 
     val getDistrictsUseCase by lazy {

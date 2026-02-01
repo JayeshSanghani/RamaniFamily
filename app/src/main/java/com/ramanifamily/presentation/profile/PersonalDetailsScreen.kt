@@ -42,13 +42,18 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.navigationBars
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ramanifamily.common.LoadingOverlay
+import com.ramanifamily.data.entity.ProfileBusinessRequest
+import com.ramanifamily.data.entity.ProfilePersonalRequest
 import com.ramanifamily.data.remote.ApiState
+import com.ramanifamily.data.remote.AppModule
 import com.ramanifamily.data.remote.AppModule.getDistrictsUseCase
 import com.ramanifamily.data.remote.AppModule.getSubDistrictsUseCase
 import com.ramanifamily.data.remote.AppModule.networkChecker
 import com.ramanifamily.data.remote.AppModule.userDataStoreRepository
 import com.ramanifamily.presentation.viewmodel.PersonalDetailsViewModel
 import com.ramanifamily.presentation.viewmodel.PersonalDetailsViewModelFactory
+import com.ramanifamily.presentation.viewmodel.ProfileViewModel
+import com.ramanifamily.presentation.viewmodel.ProfileViewModelFactory
 
 
 @Composable
@@ -94,6 +99,32 @@ fun PersonalDetailsScreenContent(
     )
     val userDetails by viewModel.userDetails.collectAsState()
 
+    val viewModelProfile: ProfileViewModel = viewModel(
+        factory = ProfileViewModelFactory(
+            AppModule.userDataStoreRepository,
+            AppModule.profilePersonalUseCase,
+            AppModule.profileBusinessUseCase,
+            AppModule.profileMaritalUseCase,
+            AppModule.networkChecker
+        )
+    )
+    val profilePersonalState by viewModelProfile.profilePersonalState.collectAsState()
+    LaunchedEffect(profilePersonalState) {
+        when (profilePersonalState) {
+            is ApiState.Success -> {
+                ToastUtils.show(context, (profilePersonalState as ApiState.Success).data.message)
+                viewModelProfile.resetPersonalState()
+                onBackClick()
+            }
+
+            is ApiState.Error -> {
+                ToastUtils.show(context, (profilePersonalState as ApiState.Error).message)
+                viewModelProfile.resetPersonalState()
+            }
+            else -> Unit
+        }
+    }
+
     val districtsState by viewModel.districtsState.collectAsState()
     val subDistrictsState by viewModel.subDistrictsState.collectAsState()
     var selectedDistrictId by remember { mutableStateOf<Int?>(null) }
@@ -117,6 +148,8 @@ fun PersonalDetailsScreenContent(
 
             district = user.user.districtName
             subDistrict = user.user.subDistrictName
+            selectedDistrictId = user.user.districtId
+            selectedSubDistrictId = user.user.subDistrictId
             village = user.user.village
             currentAddress = user.user.address
 
@@ -189,7 +222,37 @@ fun PersonalDetailsScreenContent(
                             Log.e(TAG, "Blood Group: $selectedBloodGroup")
 //                            Log.e(TAG, "Profile Image Uri: $profileImage")
 
-                            onBackClick()
+                            val request = ProfilePersonalRequest(
+                                firstName = fName,
+                                middleName = mName,
+                                surname = surname,
+
+                                districtName = district,
+                                districtId = selectedDistrictId ?: 0,
+                                subDistrictName = subDistrict,
+                                subDistrictId = selectedSubDistrictId ?: 0,
+                                village = village,
+                                address = currentAddress,
+
+                                dob = dob,
+                                age = age.toInt(),
+                                mobile = mobile,
+
+                                showNumber = showNumber,
+
+                                email = email,
+                                gender = selectedGender,
+
+                                maritalStatus = selectedMaritalStatus,
+                                donateBlood = donateBlood,
+                                lastDonated = lastDonatedDate,
+                                bloodGroup = selectedBloodGroup,
+
+                                stateName = "Gujarat",
+                                stateId = 1
+                            )
+
+                            viewModelProfile.personalState(request)
                         }
                     }
                 }
@@ -413,6 +476,7 @@ fun PersonalDetailsScreenContent(
     }
 
     val isLoading = districtsState is ApiState.Loading ||
+            profilePersonalState is ApiState.Loading ||
             subDistrictsState is ApiState.Loading
 
     LoadingOverlay(isLoading = isLoading)

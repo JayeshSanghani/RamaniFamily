@@ -7,6 +7,10 @@ import com.ramanifamily.data.entity.LoginRequest
 import com.ramanifamily.data.entity.LoginResponse
 import com.ramanifamily.data.entity.MemberListRequest
 import com.ramanifamily.data.entity.MemberListResponse
+import com.ramanifamily.data.entity.ProfileBusinessRequest
+import com.ramanifamily.data.entity.ProfileMaritalRequest
+import com.ramanifamily.data.entity.ProfilePersonalRequest
+import com.ramanifamily.data.entity.ProfileResponse
 import com.ramanifamily.data.entity.RegisterRequest
 import com.ramanifamily.data.entity.RegisterResponse
 import retrofit2.Response
@@ -34,4 +38,13 @@ interface ApiService {
 
     @POST("family/list")
     suspend fun memberList(@Body body: MemberListRequest): Response<MemberListResponse>
+
+    @POST("profile/personal")
+    suspend fun profilePersonal(@Body body: ProfilePersonalRequest): Response<ProfileResponse>
+
+    @POST("profile/business")
+    suspend fun profileBusiness(@Body body: ProfileBusinessRequest): Response<ProfileResponse>
+
+    @POST("profile/marital")
+    suspend fun profileMarital(@Body body: ProfileMaritalRequest): Response<ProfileResponse>
 }

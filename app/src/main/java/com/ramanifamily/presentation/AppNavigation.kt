@@ -53,6 +53,10 @@ fun AppNavigation() {
             LoginScreen(navController)
         }
 
+        composable("registration") {
+            RegistrationScreen(navController)
+        }
+
         composable("dashboard") {
 
             val factory = DashboardViewModelFactory(

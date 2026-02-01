@@ -4,14 +4,14 @@ package com.ramanifamily.data.entity
 import com.google.gson.annotations.SerializedName
 
 data class AddMemberResponse(@SerializedName("data")
-                             val data: Data,
+                             val data: AddMemberData,
                              @SerializedName("message")
                              val message: String = "",
                              @SerializedName("status")
                              val status: Boolean = false)
 
 
-data class Data(@SerializedName("notes")
+data class AddMemberData(@SerializedName("notes")
                 val notes: String = "",
                 @SerializedName("gender")
                 val gender: String = "",

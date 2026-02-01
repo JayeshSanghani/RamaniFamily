@@ -20,13 +20,13 @@ data class RegisterRequest(
     @SerializedName("surname")
     val surname: String = "",
     @SerializedName("sub_district_id")
-    val subDistrictId: String = "",
+    val subDistrictId: Int = 0,
     @SerializedName("blood_group")
     val bloodGroup: String = "",
     @SerializedName("state_id")
-    val stateId: String = "",
+    val stateId: Int = 0,
     @SerializedName("district_id")
-    val districtId: String = "",
+    val districtId: Int = 0,
     @SerializedName("village")
     val village: String = "",
     @SerializedName("first_name")
