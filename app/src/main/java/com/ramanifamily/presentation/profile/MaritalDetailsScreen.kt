@@ -1,13 +1,34 @@
 package com.ramanifamily.presentation.profile
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,21 +43,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.ramanifamily.R
 import com.ramanifamily.common.AppOutlinedDropdownField
 import com.ramanifamily.common.AppOutlinedTextField
 import com.ramanifamily.common.CustomButton
-import com.ramanifamily.common.ToastUtils
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
-import kotlin.text.isBlank
-import android.util.Log
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ramanifamily.common.LoadingOverlay
-import com.ramanifamily.data.entity.ProfileBusinessRequest
+import com.ramanifamily.common.ToastUtils
 import com.ramanifamily.data.entity.ProfileMaritalRequest
 import com.ramanifamily.data.remote.ApiState
 import com.ramanifamily.data.remote.AppModule
@@ -93,6 +107,23 @@ fun MaritalDetailsScreenContent(onBackClick: () -> Unit) {
     )
     val profileMaritalState by viewModel.profileMaritalState.collectAsState()
     val isLoading = profileMaritalState is ApiState.Loading
+    val userDetails by viewModel.userDetails.collectAsState()
+
+    LaunchedEffect(userDetails) {
+        userDetails?.let { user ->
+
+            height = user.user.height
+            weight = user.user.weight
+            selectedZodiac = user.user.zodiac
+            education = user.user.education
+            occupation = user.user.occupation
+            brother = user.user.brother.toString()
+            sister = user.user.sister.toString()
+            maternalDetail = user.user.maternalDetail
+            propertyDetail = user.user.propertyDetail
+        }
+    }
+
 
     LaunchedEffect(profileMaritalState) {
         when (profileMaritalState) {
@@ -106,6 +137,7 @@ fun MaritalDetailsScreenContent(onBackClick: () -> Unit) {
                 ToastUtils.show(context, (profileMaritalState as ApiState.Error).message)
                 viewModel.resetMaritalState()
             }
+
             else -> Unit
         }
     }
@@ -119,12 +151,24 @@ fun MaritalDetailsScreenContent(onBackClick: () -> Unit) {
                     when {
                         height.isBlank() -> ToastUtils.show(context, R.string.ent_height)
                         weight.isBlank() -> ToastUtils.show(context, R.string.ent_weight)
-                        selectedZodiac == "Select zodiac(રાશિ)" -> ToastUtils.show(context, R.string.ent_zodiac_sign)
+                        selectedZodiac == "Select zodiac(રાશિ)" -> ToastUtils.show(
+                            context,
+                            R.string.ent_zodiac_sign
+                        )
+
                         education.isBlank() -> ToastUtils.show(context, R.string.str_ent_education)
-                        occupation.isBlank() -> ToastUtils.show(context, R.string.str_ent_occupation)
+                        occupation.isBlank() -> ToastUtils.show(
+                            context,
+                            R.string.str_ent_occupation
+                        )
+
                         brother.isBlank() -> ToastUtils.show(context, R.string.ent_brother)
                         sister.isBlank() -> ToastUtils.show(context, R.string.ent_sister)
-                        maternalDetail.isBlank() -> ToastUtils.show(context, R.string.ent_metarnal_detail)
+                        maternalDetail.isBlank() -> ToastUtils.show(
+                            context,
+                            R.string.ent_metarnal_detail
+                        )
+
                         propertyDetail.isBlank() -> ToastUtils.show(context, R.string.ent_land)
 
                         else -> {
@@ -163,95 +207,103 @@ fun MaritalDetailsScreenContent(onBackClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
         ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp)
-        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(16.dp)
+            ) {
 
-            Row(modifier = Modifier.fillMaxWidth()) {
-                AppOutlinedTextField(
-                    value = height,
-                    onValueChange = { if (it.length <= 3 && it.all(Char::isDigit)) height = it },
-                    label = stringResource(R.string.str_height),
-                    placeholder = stringResource(R.string.str_hint_height),
-                    modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    AppOutlinedTextField(
+                        value = height,
+                        onValueChange = {
+                            if (it.length <= 3 && it.all(Char::isDigit)) height = it
+                        },
+                        label = stringResource(R.string.str_height),
+                        placeholder = stringResource(R.string.str_hint_height),
+                        modifier = Modifier.weight(1f),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    AppOutlinedTextField(
+                        value = weight,
+                        onValueChange = {
+                            if (it.length <= 3 && it.all(Char::isDigit)) weight = it
+                        },
+                        label = stringResource(R.string.str_weight),
+                        placeholder = stringResource(R.string.str_hint_weight),
+                        modifier = Modifier.weight(1f),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+                }
+
+                AppOutlinedDropdownField(
+                    value = selectedZodiac,
+                    label = stringResource(R.string.str_zodiac_sign),
+                    options = zodiacList,
+                    trailingIcon = painterResource(R.drawable.ic_down_arrow_fill),
+                    onValueChange = { selectedZodiac = it }
                 )
 
-                Spacer(modifier = Modifier.width(16.dp))
+                AppOutlinedTextField(
+                    value = education,
+                    onValueChange = { education = it },
+                    label = stringResource(R.string.str_education),
+                    placeholder = stringResource(R.string.str_education)
+                )
 
                 AppOutlinedTextField(
-                    value = weight,
-                    onValueChange = { if (it.length <= 3 && it.all(Char::isDigit)) weight = it },
-                    label = stringResource(R.string.str_weight),
-                    placeholder = stringResource(R.string.str_hint_weight),
-                    modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    value = occupation,
+                    onValueChange = { occupation = it },
+                    label = stringResource(R.string.str_occupation),
+                    placeholder = stringResource(R.string.str_occupation)
+                )
+
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    AppOutlinedTextField(
+                        value = brother,
+                        onValueChange = {
+                            if (it.length <= 2 && it.all(Char::isDigit)) brother = it
+                        },
+                        label = stringResource(R.string.str_brother),
+                        placeholder = stringResource(R.string.str_brother),
+                        modifier = Modifier.weight(1f),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    AppOutlinedTextField(
+                        value = sister,
+                        onValueChange = {
+                            if (it.length <= 2 && it.all(Char::isDigit)) sister = it
+                        },
+                        label = stringResource(R.string.str_sister),
+                        placeholder = stringResource(R.string.str_sister),
+                        modifier = Modifier.weight(1f),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+                }
+
+                AppOutlinedTextField(
+                    value = maternalDetail,
+                    onValueChange = { maternalDetail = it },
+                    label = stringResource(R.string.str_metarnal_detail),
+                    placeholder = stringResource(R.string.ent_metarnal_detail)
+                )
+
+                AppOutlinedTextField(
+                    value = propertyDetail,
+                    onValueChange = { propertyDetail = it },
+                    label = stringResource(R.string.str_land),
+                    placeholder = stringResource(R.string.ent_land)
                 )
             }
-
-            AppOutlinedDropdownField(
-                value = selectedZodiac,
-                label = stringResource(R.string.str_zodiac_sign),
-                options = zodiacList,
-                trailingIcon = painterResource(R.drawable.ic_down_arrow_fill),
-                onValueChange = { selectedZodiac = it }
-            )
-
-            AppOutlinedTextField(
-                value = education,
-                onValueChange = { education = it },
-                label = stringResource(R.string.str_education),
-                placeholder = stringResource(R.string.str_education)
-            )
-
-            AppOutlinedTextField(
-                value = occupation,
-                onValueChange = { occupation = it },
-                label = stringResource(R.string.str_occupation),
-                placeholder = stringResource(R.string.str_occupation)
-            )
-
-            Row(modifier = Modifier.fillMaxWidth()) {
-                AppOutlinedTextField(
-                    value = brother,
-                    onValueChange = { if (it.length <= 2 && it.all(Char::isDigit)) brother = it },
-                    label = stringResource(R.string.str_brother),
-                    placeholder = stringResource(R.string.str_brother),
-                    modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                AppOutlinedTextField(
-                    value = sister,
-                    onValueChange = { if (it.length <= 2 && it.all(Char::isDigit)) sister = it },
-                    label = stringResource(R.string.str_sister),
-                    placeholder = stringResource(R.string.str_sister),
-                    modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-            }
-
-            AppOutlinedTextField(
-                value = maternalDetail,
-                onValueChange = { maternalDetail = it },
-                label = stringResource(R.string.str_metarnal_detail),
-                placeholder = stringResource(R.string.ent_metarnal_detail)
-            )
-
-            AppOutlinedTextField(
-                value = propertyDetail,
-                onValueChange = { propertyDetail = it },
-                label = stringResource(R.string.str_land),
-                placeholder = stringResource(R.string.ent_land)
-            )
+            LoadingOverlay(isLoading = isLoading)
         }
-    }
-        LoadingOverlay(isLoading = isLoading)
     }
 }
 
@@ -299,7 +351,7 @@ fun MaritalDetailsSaveButtonBar(
             .fillMaxWidth()
             .background(Color.White)
             .padding(WindowInsets.navigationBars.asPaddingValues())
-            .padding(16.dp,0.dp,16.dp,8.dp),
+            .padding(16.dp, 0.dp, 16.dp, 8.dp),
         horizontalArrangement = Arrangement.End
     ) {
         CustomButton(

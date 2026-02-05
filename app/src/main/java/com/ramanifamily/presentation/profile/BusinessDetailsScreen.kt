@@ -45,7 +45,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.ramanifamily.R
@@ -53,18 +52,11 @@ import com.ramanifamily.common.AppOutlinedTextField
 import com.ramanifamily.common.CustomButton
 import com.ramanifamily.common.LoadingOverlay
 import com.ramanifamily.common.ToastUtils
-import com.ramanifamily.common.Utils
 import com.ramanifamily.data.entity.ProfileBusinessRequest
-import com.ramanifamily.data.entity.RegisterRequest
 import com.ramanifamily.data.remote.ApiState
 import com.ramanifamily.data.remote.AppModule
 import com.ramanifamily.presentation.viewmodel.ProfileViewModel
 import com.ramanifamily.presentation.viewmodel.ProfileViewModelFactory
-import com.ramanifamily.presentation.viewmodel.RegisterViewModel
-import com.ramanifamily.presentation.viewmodel.RegisterViewModelFactory
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 
 
 @Composable
@@ -75,6 +67,7 @@ fun BusinessDetailsScreen(
         onBackClick = { navController.navigateUp() }
     )
 }
+
 @Composable
 fun BusinessDetailsScreenContent(
     onBackClick: () -> Unit
@@ -100,6 +93,8 @@ fun BusinessDetailsScreenContent(
     val profileBusinessState by viewModel.profileBusinessState.collectAsState()
     val isLoading = profileBusinessState is ApiState.Loading
 
+    val userDetails by viewModel.userDetails.collectAsState()
+
     LaunchedEffect(profileBusinessState) {
         when (profileBusinessState) {
             is ApiState.Success -> {
@@ -112,18 +107,20 @@ fun BusinessDetailsScreenContent(
                 ToastUtils.show(context, (profileBusinessState as ApiState.Error).message)
                 viewModel.resetBusinessState()
             }
+
             else -> Unit
         }
     }
 
-//    val userDetails by viewModel.userDetails.collectAsState()
-//    LaunchedEffect(userDetails) {
-//        userDetails?.let { user ->
-//
-//            businessName = user.bu
-//        }
-//    }
-
+    LaunchedEffect(userDetails) {
+        userDetails?.let { user ->
+            businessName = user.user.businessName
+            businessAddress = user.user.businessAddress
+            businessContact = user.user.businessContact
+            showNumber = user.user.showNumber
+            otherDetail = user.user.otherDetail
+        }
+    }
 
     Scaffold(
         containerColor = Color.White,
@@ -134,10 +131,25 @@ fun BusinessDetailsScreenContent(
             BusinessDetailsSaveButtonBar(
                 onSaveClick = {
                     when {
-                        businessName.isBlank() -> ToastUtils.show(context, R.string.str_business_name)
-                        businessAddress.isBlank() -> ToastUtils.show(context, R.string.str_business_address)
-                        businessContact.isBlank() -> ToastUtils.show(context, R.string.str_business_contact)
-                        businessContact.length != 10 -> ToastUtils.show(context, R.string.ent_mobile)
+                        businessName.isBlank() -> ToastUtils.show(
+                            context,
+                            R.string.str_business_name
+                        )
+
+                        businessAddress.isBlank() -> ToastUtils.show(
+                            context,
+                            R.string.str_business_address
+                        )
+
+                        businessContact.isBlank() -> ToastUtils.show(
+                            context,
+                            R.string.str_business_contact
+                        )
+
+                        businessContact.length != 10 -> ToastUtils.show(
+                            context,
+                            R.string.ent_mobile
+                        )
 
                         else -> {
                             val TAG = "BusinessDetails"
@@ -237,8 +249,8 @@ fun BusinessDetailsScreenContent(
                     placeholder = stringResource(R.string.str_other_detail)
                 )
             }
+            LoadingOverlay(isLoading = isLoading)
         }
-        LoadingOverlay(isLoading = isLoading)
     }
 }
 
@@ -289,7 +301,7 @@ fun BusinessDetailsSaveButtonBar(
             .fillMaxWidth()
             .background(Color.White)
             .padding(WindowInsets.navigationBars.asPaddingValues())
-            .padding(16.dp,0.dp,16.dp,8.dp),
+            .padding(16.dp, 0.dp, 16.dp, 8.dp),
         horizontalArrangement = Arrangement.End
     ) {
         CustomButton(

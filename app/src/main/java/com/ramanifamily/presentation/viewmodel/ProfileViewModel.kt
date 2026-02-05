@@ -19,7 +19,10 @@ import com.ramanifamily.domain.usecase.ProfileBusinessUseCase
 import com.ramanifamily.domain.usecase.ProfileMaritalUseCase
 import com.ramanifamily.domain.usecase.ProfilePersonalUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(
@@ -31,6 +34,16 @@ class ProfileViewModel(
 ) : ViewModel() {
 
     val userProfile = userDataStoreRepository.getLoginResponse()
+
+    //Map Proto → UI Model HERE
+    val userDetails = userDataStoreRepository.getLoginResponse().map { proto ->
+        proto.takeIf { proto.user.id.toString().isNotBlank() }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = null
+    )
+
     fun logout(onComplete: () -> Unit) {
         viewModelScope.launch {
             userDataStoreRepository.clear()

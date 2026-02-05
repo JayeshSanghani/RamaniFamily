@@ -66,8 +66,8 @@ fun LoginScreen(
     val view = LocalView.current
     val context = view.context
 
-    var mobileNo by remember { mutableStateOf("7600400399") }
-    var password by remember { mutableStateOf("123456") }
+    var mobileNo by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
 
     val viewModel : LoginViewModel = viewModel(factory = LoginViewModelFactory(AppModule.loginUserUseCase, AppModule.networkChecker, AppModule.userDataStoreRepository))

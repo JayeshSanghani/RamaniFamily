@@ -1,11 +1,23 @@
 package com.ramanifamily.presentation.profile
 
-import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -13,7 +25,13 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,21 +46,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.ramanifamily.R
 import com.ramanifamily.common.AppOutlinedDatePickerField
 import com.ramanifamily.common.AppOutlinedDropdownField
 import com.ramanifamily.common.AppOutlinedTextField
 import com.ramanifamily.common.CustomButton
-import com.ramanifamily.common.ProfileImagePicker
+import com.ramanifamily.common.LoadingOverlay
 import com.ramanifamily.common.ToastUtils
 import com.ramanifamily.common.Utils
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.navigationBars
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ramanifamily.common.LoadingOverlay
-import com.ramanifamily.data.entity.ProfileBusinessRequest
 import com.ramanifamily.data.entity.ProfilePersonalRequest
 import com.ramanifamily.data.remote.ApiState
 import com.ramanifamily.data.remote.AppModule
@@ -168,7 +181,6 @@ fun PersonalDetailsScreenContent(
             donateBlood = user.user.donateBlood
         }
     }
-
 
     Scaffold(
         containerColor = Color.White,
@@ -349,27 +361,6 @@ fun PersonalDetailsScreenContent(
                 label = stringResource(R.string.str_village)
             )
 
-//            AppOutlinedDropdownField(
-//                value = district,
-//                label = stringResource(R.string.sel_district),
-//                options = districtList,
-//                trailingIcon = painterResource(R.drawable.ic_down_arrow_fill)
-//            ) { district = it }
-//
-//            AppOutlinedDropdownField(
-//                value = taluka,
-//                label = stringResource(R.string.sel_taluka),
-//                options = talukaList,
-//                trailingIcon = painterResource(R.drawable.ic_down_arrow_fill)
-//            ) { taluka = it }
-//
-//            AppOutlinedDropdownField(
-//                value = village,
-//                label = stringResource(R.string.sel_village),
-//                options = villageList,
-//                trailingIcon = painterResource(R.drawable.ic_down_arrow_fill)
-//            ) { village = it }
-
             AppOutlinedTextField(
                 value = currentAddress,
                 onValueChange = { currentAddress = it },
@@ -398,7 +389,6 @@ fun PersonalDetailsScreenContent(
                     readOnly = true    //  better than enabled=false
                 )
             }
-
 
             AppOutlinedTextField(
                 value = mobile,
@@ -444,12 +434,6 @@ fun PersonalDetailsScreenContent(
                     modifier = Modifier.weight(0.6f)
                 ) { selectedMaritalStatus = it }
             }
-
-//            AppOutlinedTextField(
-//                value = lastDonatedDate,
-//                onValueChange = { lastDonatedDate = it },
-//                label = stringResource(R.string.str_lbl_date_of_donation)
-//            )
 
             AppOutlinedDropdownField(
                 value = selectedBloodGroup,
