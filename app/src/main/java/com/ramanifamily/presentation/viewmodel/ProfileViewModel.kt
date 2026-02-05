@@ -58,7 +58,9 @@ class ProfileViewModel(
             try {
                 val response = profilePersonalUseCase.execute(request)
                 if (response.isSuccessful && response.body()?.status == true) {
-                    _profilePersonalState.value =  ApiState.Success(response.body()!!)
+                    val profileResponse = response.body()!!
+                    userDataStoreRepository.saveProfileResponse(profileResponse)
+                    _profilePersonalState.value =  ApiState.Success(profileResponse)
                 } else {
                     _profilePersonalState.value = ApiState.Error(Utils.parseError(response))
                 }
@@ -84,7 +86,9 @@ class ProfileViewModel(
             try {
                 val response = profileBusinessUseCase.execute(request)
                 if (response.isSuccessful && response.body()?.status == true) {
-                    _profileBusinessState.value =  ApiState.Success(response.body()!!)
+                    val profileResponse = response.body()!!
+                    userDataStoreRepository.saveProfileResponse(profileResponse)
+                    _profileBusinessState.value =  ApiState.Success(profileResponse)
                 } else {
                     _profileBusinessState.value = ApiState.Error(Utils.parseError(response))
                 }
@@ -110,7 +114,9 @@ class ProfileViewModel(
             try {
                 val response = profileMaritalUseCase.execute(request)
                 if (response.isSuccessful && response.body()?.status == true) {
-                    _profileMaritalState.value =  ApiState.Success(response.body()!!)
+                    val profileResponse = response.body()!!
+                    userDataStoreRepository.saveProfileResponse(profileResponse)
+                    _profileMaritalState.value =  ApiState.Success(profileResponse)
                 } else {
                     _profileMaritalState.value = ApiState.Error(Utils.parseError(response))
                 }
