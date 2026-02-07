@@ -46,6 +46,9 @@
     <string name="str_marital_detail">Marital Detail</string>
     <string name="str_logout">Logout</string>
 
+    <string name="str_family_members">Members</string>
+    <string name="str_search_members">Search member</string>
+    <string name="str_add">Add</string>
     <string name="str_member_id">Member id</string>
     <string name="str_member_id_msg">Have you Member id, then register with it. Otherwise Skip and fill up your basic details.</string>
     <string name="ent_member_id">Enter your id.</string>
