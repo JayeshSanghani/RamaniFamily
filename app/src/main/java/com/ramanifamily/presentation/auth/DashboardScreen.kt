@@ -1,5 +1,11 @@
 package com.ramanifamily.presentation.auth
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import androidx.annotation.DrawableRes
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,6 +31,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,11 +47,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -327,6 +339,202 @@ fun SearchBar(
 }
 
 @Composable
+fun Chip(text: String) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(colorResource(R.color.green_700).copy(alpha = 0.12f))
+            .padding(horizontal = 10.dp, vertical = 4.dp)
+    ) {
+        Text(
+            text = text,
+            fontSize = 12.sp,
+            color = colorResource(R.color.green_700),
+            fontWeight = FontWeight.SemiBold
+        )
+    }
+}
+
+
+@Composable
+fun InfoRow(
+    @DrawableRes icon: Int,
+    text: String
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 4.dp)
+    ) {
+        Image(
+            painter = painterResource(icon),
+            contentDescription = null,
+            modifier = Modifier.size(14.dp),
+            colorFilter = ColorFilter.tint(Color.Gray)
+        )
+        Spacer(Modifier.width(6.dp))
+        Text(
+            text = text,
+            fontSize = 13.sp,
+            color = Color.DarkGray
+        )
+    }
+}
+
+@Composable
+fun MobileNumberRow(
+    phone: String,
+    onClick: () -> Unit
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+
+        Image(
+            painter = painterResource(R.drawable.ic_call),
+            contentDescription = null,
+            modifier = Modifier.size(14.dp),
+            colorFilter = ColorFilter.tint(Color.Gray)
+        )
+
+        Spacer(Modifier.width(6.dp))
+
+        Text(
+            text = phone,
+            fontSize = 13.sp,
+            color = colorResource(R.color.green_700),
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.clickable { onClick() } // ✅ ONLY text clickable
+        )
+    }
+}
+
+@Composable
+fun FamilyMemberItem(member: MemberListDataItem) {
+
+    var expanded by remember { mutableStateOf(false) }
+
+    // Arrow rotation animation
+    val rotation by animateFloatAsState(
+        targetValue = if (expanded) 180f else 0f,
+        label = "arrow_rotation"
+    )
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { expanded = !expanded },
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(3.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(14.dp)
+                .animateContentSize() // smooth expand
+        ) {
+
+            // ─── Header Row ───
+            Row(verticalAlignment = Alignment.CenterVertically) {
+
+                // Avatar
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(
+                            colorResource(R.color.green_700).copy(alpha = 0.15f)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = member.firstName.first().uppercase(),
+                        fontWeight = FontWeight.Bold,
+                        color = colorResource(R.color.green_700)
+                    )
+                }
+
+                Spacer(Modifier.width(12.dp))
+
+                // Name + Relation
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "${member.firstName} ${member.surname}",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = member.relation,
+                        fontSize = 13.sp,
+                        color = Color.Gray
+                    )
+                }
+
+                // ⬇ Expand Arrow
+                Image(
+                    painter = painterResource(R.drawable.ic_down),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .graphicsLayer { rotationZ = rotation },
+                    colorFilter = ColorFilter.tint(Color.Gray)
+                )
+            }
+
+            // ─── Expanded Content ───
+            if (expanded) {
+
+                Spacer(Modifier.height(12.dp))
+                HorizontalDivider(color = Color.LightGray.copy(alpha = 0.4f))
+                Spacer(Modifier.height(10.dp))
+
+                // Blood Group
+                if (member.bloodGroup.isNotBlank()) {
+                    InfoRow(
+                        icon = R.drawable.ic_blood,
+                        text = member.bloodGroup
+                    )
+                }
+
+                // Mobile
+                val context = LocalContext.current
+                if (member.mobile.isNotBlank()) {
+                    MobileNumberRow(
+                        phone = member.mobile,
+                        onClick = {
+                            callNumber(context, member.mobile)
+                        }
+                    )
+                }
+
+                // Gender
+                if (member.gender.isNotBlank()) {
+                    InfoRow(
+                        icon = R.drawable.ic_gender,
+                        text = member.gender
+                    )
+                }
+
+                // Notes
+                if (!member.notes.isNullOrBlank()) {
+                    Text(
+                        text = member.notes,
+                        fontSize = 12.sp,
+                        color = Color.Gray,
+                        fontStyle = FontStyle.Italic
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+fun callNumber(context: Context, phone: String) {
+    val intent = Intent(Intent.ACTION_DIAL).apply {
+        data = Uri.parse("tel:$phone")
+    }
+    context.startActivity(intent)
+}
+
+/*@Composable
 fun FamilyMemberItem(member: MemberListDataItem) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -370,14 +578,14 @@ fun FamilyMemberItem(member: MemberListDataItem) {
                 )
             }
 
-            /* Image(
+            *//* Image(
                  painter = painterResource(R.drawable.ic_right),
                  contentDescription = null,
                  modifier = Modifier.size(18.dp)
-             )*/
+             )*//*
         }
     }
-}
+}*/
 
 
 
