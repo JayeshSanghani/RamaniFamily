@@ -1,0 +1,10 @@
+Path: C:\Users\jayes\OneDrive\Desktop\Ramanifamily
+Password: Ramani@2026
+
+
+key
+Alias:Ramani
+Password: Ramani@2026
+
+D:\Work Space\RamaniFamily\app\release
+

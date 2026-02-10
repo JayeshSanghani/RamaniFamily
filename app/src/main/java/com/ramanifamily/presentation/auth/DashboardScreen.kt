@@ -486,7 +486,7 @@ fun FamilyMemberItem(member: MemberListDataItem) {
                 Spacer(Modifier.height(10.dp))
 
                 // Blood Group
-                if (member.bloodGroup.isNotBlank()) {
+                if (!member.bloodGroup.isNullOrBlank()) {
                     InfoRow(
                         icon = R.drawable.ic_blood,
                         text = member.bloodGroup
@@ -495,7 +495,7 @@ fun FamilyMemberItem(member: MemberListDataItem) {
 
                 // Mobile
                 val context = LocalContext.current
-                if (member.mobile.isNotBlank()) {
+                if (!member.mobile.isNullOrBlank()) {
                     MobileNumberRow(
                         phone = member.mobile,
                         onClick = {
@@ -505,12 +505,58 @@ fun FamilyMemberItem(member: MemberListDataItem) {
                 }
 
                 // Gender
-                if (member.gender.isNotBlank()) {
+                if (!member.gender.isNullOrBlank()) {
                     InfoRow(
                         icon = R.drawable.ic_gender,
                         text = member.gender
                     )
                 }
+
+                // ───────── BUSINESS SECTION ─────────
+                if (!member.businessName.isNullOrBlank() ||
+                    !member.businessAddress.isNullOrBlank() ||
+                    !member.businessContact.isNullOrBlank() ||
+                    !member.otherDetail.isNullOrBlank()
+                ) {
+
+                    Spacer(Modifier.height(14.dp))
+                    HorizontalDivider(color = Color.LightGray.copy(alpha = 0.4f))
+                    Spacer(Modifier.height(12.dp))
+
+                    Text(
+                        text = "Business Details",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp
+                    )
+
+                    Spacer(Modifier.height(8.dp))
+
+                    member.businessName?.takeIf { it.isNotBlank() }?.let {
+                        InfoRow(icon = R.drawable.ic_business, text = it)
+                    }
+
+                    member.businessAddress?.takeIf { it.isNotBlank() }?.let {
+                        InfoRow(icon = R.drawable.ic_location, text = it)
+                    }
+
+                    member.businessContact?.takeIf { it.isNotBlank() }?.let {
+                        MobileNumberRow(
+                            phone = it,
+                            onClick = { callNumber(context, it) }
+                        )
+                    }
+
+                    member.otherDetail?.takeIf { it.isNotBlank() }?.let {
+                        Text(
+                            text = it,
+                            fontSize = 12.sp,
+                            color = Color.Gray,
+                            fontStyle = FontStyle.Italic,
+                            modifier = Modifier.padding(top = 6.dp)
+                        )
+                    }
+                }
+
 
                 // Notes
                 if (!member.notes.isNullOrBlank()) {

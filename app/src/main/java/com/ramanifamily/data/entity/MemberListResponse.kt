@@ -24,7 +24,15 @@ data class MemberListDataItem(@SerializedName("notes")
                     @SerializedName("first_name")
                     val firstName: String = "",
                     @SerializedName("relation")
-                    val relation: String = "")
+                    val relation: String = "",
+                    @SerializedName("business_name")
+                    val businessName: String = "",
+                    @SerializedName("business_address")
+                    val businessAddress: String = "",
+                    @SerializedName("business_contact")
+                    val businessContact: String = "",
+                    @SerializedName("other_detail")
+                    val otherDetail: String = "")
 
 
 data class MemberListResponse(@SerializedName("is_admin")
